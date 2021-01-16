@@ -8,6 +8,12 @@
 #include <EEPROM.h>
 #include <FastLED.h>
 
+#include "WifiManager.h"
+
+#if !( defined(ESP32) )
+  #error This code is intended to run on ESP32 platform! Please check your Tools->Board setting.
+#endif
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
@@ -20,7 +26,6 @@
 #define COLOR_ORDER GRB
 CRGB leds[NUM_LEDS];
 
-
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 Adafruit_BME280 bme;
@@ -29,7 +34,9 @@ int tempInC = EEPROM.read(0);
 float p = 0;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(115200); while (!Serial); delay(200);
+
+  setupWifi();
 
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -58,7 +65,7 @@ void loop() {
   // display temperature
   display.setTextSize(1);
   display.setCursor(0,0);
-  display.print("Hello guys!!!");
+  display.print("Wazzaaa!!!");
   
   //
   display.fillRect(0, 8, p, 8, WHITE);
