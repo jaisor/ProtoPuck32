@@ -8,25 +8,18 @@
 #include <EEPROM.h>
 #include <FastLED.h>
 
+#include "Configuration.h"
 #include "WifiManager.h"
 
 #if !( defined(ESP32) )
   #error This code is intended to run on ESP32 platform! Please check your Tools->Board setting.
 #endif
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+CRGB leds[LED_STRIP_SIZE];
 
-#define BOOT_BUTTON 0
+uint8_t r, g, b;
 
-#define LED_PIN     13
-#define NUM_LEDS    12
-#define BRIGHTNESS  255
-#define LED_TYPE    WS2811
-#define COLOR_ORDER GRB
-CRGB leds[NUM_LEDS];
-
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, -1);
 
 Adafruit_BME280 bme;
 
@@ -53,8 +46,8 @@ void setup() {
   display.clearDisplay();
   display.setTextColor(WHITE);
 
-  FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-  FastLED.setBrightness(  BRIGHTNESS );
+  FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(leds, LED_STRIP_SIZE).setCorrection( TypicalLEDStrip );
+  FastLED.setBrightness( LED_BRIGHTNESS );
     
   //currentPalette = RainbowColors_p;
   //currentBlending = LINEARBLEND;
@@ -70,7 +63,7 @@ void loop() {
   //
   display.fillRect(0, 8, p, 8, WHITE);
   p += 5;
-  if (p>SCREEN_WIDTH) {
+  if (p>OLED_SCREEN_WIDTH) {
     p=0;
   }
   //
@@ -109,8 +102,21 @@ void loop() {
 
   //
 
-  for( int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CRGB(245, 5, 37);
+  for( int i = 0; i < LED_STRIP_SIZE; i++) {
+      //leds[i] = CRGB(245, 5, 37);
+      leds[i] = CRGB(r, g, b);
+
+      r += random(-2,2);
+      g += random(-2,2);
+      b += random(-2,2);
+
+      if (r>=255) r=0;
+      if (g>=255) g=0;
+      if (b>=255) b=0;
+
+      if (r<=0) r=255;
+      if (g<=0) g=255;
+      if (b<=0) b=255;
   }
   FastLED.show();
 
