@@ -7,13 +7,14 @@
 #define WEATHER     // Temperature, humidity, pressure
 
 #define BOOT_BUTTON 0
+#define EEPROM_CONFIGURATION_START 10    // First EEPROM byte to be used for storing the configuration
 
 #ifdef WIFI
     #define WIFI_SSID "ProtoPuck32"
     #define WIFI_PASS "password123"
 
     // If unable to connect, it will create a soft accesspoint
-    #define WIFI_FALLBACK_SSID "ProtoPuck32" // device chip id will be suffixed
+    #define WIFI_FALLBACK_SSID "PP" // device chip id will be suffixed
     #define WIFI_FALLBACK_PASS "password123"
 #endif
 
@@ -28,7 +29,20 @@
 #ifdef OLED
     #define OLED_SCREEN_WIDTH 128 // OLED display width, in pixels
     #define OLED_SCREEN_HEIGHT 64 // OLED display height, in pixels
-
 #endif
+
+struct configuration_t
+{
+    #ifdef WIFI
+        char wifi_ssid[32];
+        char wifi_password[63];
+    #endif
+};
+
+extern configuration_t configuration;
+
+int EEPROM_saveConfig();
+int EEPROM_loadConfig();
+int EEPROM_wipe();
 
 #endif

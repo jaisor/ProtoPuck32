@@ -16,12 +16,12 @@
 #endif
 
 CRGB leds[LED_STRIP_SIZE];
-
 uint8_t r, g, b;
 
 Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, -1);
-
 Adafruit_BME280 bme;
+
+CWifiManager *wifiManager;
 
 int tempInC = EEPROM.read(0);
 float p = 0;
@@ -29,7 +29,11 @@ float p = 0;
 void setup() {
   Serial.begin(115200); while (!Serial); delay(200);
 
-  setupWifi();
+  EEPROM_loadConfig();
+
+  //strcpy(configuration.wifi_ssid, "<REDACTED>");
+  //strcpy(configuration.wifi_password, "<REDACTED>");
+  //EEPROM_saveConfig();
 
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -48,6 +52,8 @@ void setup() {
 
   FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(leds, LED_STRIP_SIZE).setCorrection( TypicalLEDStrip );
   FastLED.setBrightness( LED_BRIGHTNESS );
+
+  wifiManager = new CWifiManager();
     
   //currentPalette = RainbowColors_p;
   //currentBlending = LINEARBLEND;
@@ -55,18 +61,12 @@ void setup() {
 
 void loop() {
   display.clearDisplay();
+
+  wifiManager->OLED_Status(&display);
+
+  //
+
   // display temperature
-  display.setTextSize(1);
-  display.setCursor(0,0);
-  display.print("Wazzaaa!!!");
-  
-  //
-  display.fillRect(0, 8, p, 8, WHITE);
-  p += 5;
-  if (p>OLED_SCREEN_WIDTH) {
-    p=0;
-  }
-  //
   
   display.setCursor(0,16);
   display.print("Temperature: ");
@@ -120,5 +120,10 @@ void loop() {
   }
   FastLED.show();
 
-  delay(100);
+  //
+
+  display.display();
+  FastLED.show();
+
+  delay(300);
 }
