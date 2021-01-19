@@ -16,6 +16,9 @@
     // If unable to connect, it will create a soft accesspoint
     #define WIFI_FALLBACK_SSID "PP" // device chip id will be suffixed
     #define WIFI_FALLBACK_PASS "password123"
+
+    // Web server
+    #define WEB_SERVER_PORT 80
 #endif
 
 #ifdef LED
@@ -41,8 +44,8 @@ struct configuration_t
 
 extern configuration_t configuration;
 
-int EEPROM_saveConfig();
-int EEPROM_loadConfig();
-int EEPROM_wipe();
+void EEPROM_saveConfig();
+void EEPROM_loadConfig();
+void EEPROM_wipe();
 
 #endif

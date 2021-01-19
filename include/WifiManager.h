@@ -4,14 +4,21 @@
 #include <WiFi.h>
 #include "BaseManager.h"
 
+typedef enum {
+    WF_CONNECTING = 0,
+    WF_LISTENING = 1
+} wifi_status;
+
 class CWifiManager: public CBaseManager {
 
 private:
     unsigned long tMillis;
-    wl_status_t lastStatus;
+    wifi_status status;
     char softAP_SSID[32];
+    WiFiServer server;
 
-    void createAccessPoint();
+    void connect();
+    void listen();
     
 public:
 	CWifiManager();

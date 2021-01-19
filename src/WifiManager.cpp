@@ -30,27 +30,20 @@ static const uint8_t icon_wifi[8] = {
 CWifiManager::CWifiManager() {
 
   tMillis = millis();
-
-  strcpy(softAP_SSID, "");
-
-  if (strlen(configuration.wifi_ssid)) {
-    // Join AP from Config
-    Serial.print("Connecting to WiFi ");
-    Serial.println(configuration.wifi_ssid);
-    WiFi.begin(configuration.wifi_ssid, configuration.wifi_password);
-    lastStatus = WiFi.status();
-  } else {
-    createAccessPoint();
-  }
+  status = WF_CONNECTING;
+  connect();
 }
 
 uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
 
-  wl_status_t status = WiFi.status();
+  wl_status_t s = WiFi.status();
   
   oled->setTextSize(1);
 
-  if (status == WL_CONNECTED) {
+  if (s == WL_CONNECTED) {
+
+    listen();
+
     tMillis = millis();
     oled->drawBitmap(0, 0, icon_wifi, 8, 8, 1);
 
@@ -65,8 +58,10 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
     sprintf(buf, "IP: %s", ip.toString().c_str());
     oled->setCursor(0,8);
     oled->print(buf);
-  } else if(status == WL_NO_SHIELD) {
+  } else if(s == WL_NO_SHIELD) {
 
+    listen();
+    
     tMillis = millis();
     oled->drawBitmap(0, 0, icon_wifi, 8, 8, 1);
 
@@ -83,37 +78,83 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
 
   } else  {
 
-    unsigned long dt = millis() - tMillis;
-    oled->drawBitmap(0, 0, icon_wifi, 8, 8, 1);
+    if (status == WF_CONNECTING) {
+      unsigned long dt = millis() - tMillis;
+      oled->drawBitmap(0, 0, icon_wifi, 8, 8, 1);
 
-    oled->setCursor(10,0);
-    oled->print(configuration.wifi_ssid);
-    
-    oled->drawRect(1, 9, OLED_SCREEN_WIDTH-1, 7, 1);
+      oled->setCursor(10,0);
+      oled->print(configuration.wifi_ssid);
+      
+      oled->drawRect(1, 9, OLED_SCREEN_WIDTH-1, 7, 1);
 
-    uint8_t w = dt * (OLED_SCREEN_WIDTH-5) / MAX_CONNECT_TIMEOUT_MS;
-    if (dt > MAX_CONNECT_TIMEOUT_MS) {
-      w = OLED_SCREEN_WIDTH-5;
+      uint8_t w = dt * (OLED_SCREEN_WIDTH-5) / MAX_CONNECT_TIMEOUT_MS;
+      if (dt > MAX_CONNECT_TIMEOUT_MS) {
+        w = OLED_SCREEN_WIDTH-5;
+      }
+      oled->fillRect(3, 11, w, 3, 1);
+    } else {
+      connect();
     }
-    oled->fillRect(3, 11, w, 3, 1);
+
   }  
   
   //
 
-  lastStatus = status;
-  return 300;
+  return 100;
 }
 
-void CWifiManager::createAccessPoint() {
-  uint32_t chipId = 0;
-   for(int i=0; i<17; i=i+8) {
-	  chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
-	}
+void CWifiManager::connect() {
 
-  Serial.print("Chip ID: "); Serial.println(chipId);
+  status = WF_CONNECTING;
+  strcpy(softAP_SSID, "");
 
-  sprintf_P(softAP_SSID, "%s_%i", WIFI_FALLBACK_SSID, chipId);
+   if (strlen(configuration.wifi_ssid)) {
 
-  Serial.print("Creating WiFi "); Serial.print(softAP_SSID);
-  WiFi.softAP(softAP_SSID, WIFI_FALLBACK_PASS);
+    // Join AP from Config
+    Serial.print("Connecting to WiFi ");
+    Serial.println(configuration.wifi_ssid);
+    WiFi.begin(configuration.wifi_ssid, configuration.wifi_password);
+    
+  } else {
+
+    // Create AP using fallback and chip ID
+    uint32_t chipId = 0;
+    for(int i=0; i<17; i=i+8) {
+      chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+    }
+
+    Serial.print("Chip ID: "); Serial.println(chipId);
+
+    sprintf_P(softAP_SSID, "%s_%i", WIFI_FALLBACK_SSID, chipId);
+
+    Serial.print("Creating WiFi "); Serial.print(softAP_SSID);
+    WiFi.softAP(softAP_SSID, WIFI_FALLBACK_PASS);
+
+  }
+  
+}
+
+void CWifiManager::listen() {
+
+  if (status != WF_LISTENING) {
+    status = WF_LISTENING;
+    server.begin(WEB_SERVER_PORT);
+    Serial.print("Web server listening on port "); Serial.println(WEB_SERVER_PORT);
+    return;
+  }
+
+  if (server.hasClient()) {
+    WiFiClient client = server.available();
+    client.setTimeout(2);
+    Serial.print("New client from: "); Serial.println(client.remoteIP());
+    while (client.connected()) {
+      char c = client.read();
+      Serial.write(c);   
+    }
+    client.stop();
+  }  else {
+    Serial.print(".");
+  }
+  
+  
 }
