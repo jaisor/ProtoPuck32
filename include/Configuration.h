@@ -23,8 +23,8 @@
 
 #ifdef LED
     #define LED_PIN 13
-    #define LED_STRIP_SIZE 23
-    #define LED_BRIGHTNESS 20
+    #define LED_STRIP_SIZE 484 // 23
+    #define LED_BRIGHTNESS 50
     #define LED_TYPE WS2811
     #define LED_COLOR_ORDER GRB
 #endif

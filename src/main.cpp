@@ -10,6 +10,7 @@
 
 #include "Configuration.h"
 #include "WifiManager.h"
+#include "LedManager.h"
 
 #if !( defined(ESP32) )
   #error This code is intended to run on ESP32 platform! Please check your Tools->Board setting.
@@ -22,6 +23,7 @@ Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, -1);
 Adafruit_BME280 bme;
 
 CWifiManager *wifiManager;
+CLEDManager *ledManager;
 
 int tempInC = EEPROM.read(0);
 float p = 0;
@@ -54,6 +56,7 @@ void setup() {
   FastLED.setBrightness( LED_BRIGHTNESS );
 
   wifiManager = new CWifiManager();
+  ledManager = new CLEDManager();
     
   //currentPalette = RainbowColors_p;
   //currentBlending = LINEARBLEND;
@@ -102,6 +105,7 @@ void loop() {
 
   //
 
+/*
   for( int i = 0; i < LED_STRIP_SIZE; i++) {
       //leds[i] = CRGB(245, 5, 37);
       leds[i] = CRGB(r, g, b);
@@ -118,12 +122,20 @@ void loop() {
       if (g<=0) g=255;
       if (b<=0) b=255;
   }
-  FastLED.show();
+*/
+
+  ledManager->ChangePalettePeriodically();
+    
+    static uint8_t startIndex = 0;
+    startIndex = startIndex + 1;
+    
+  ledManager->FillLEDsFromPaletteColors(leds, startIndex);
+  
 
   //
 
   display.display();
   FastLED.show();
 
-  delay(300);
+  delay(10);
 }
