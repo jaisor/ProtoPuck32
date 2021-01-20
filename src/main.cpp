@@ -22,8 +22,9 @@ uint8_t r, g, b;
 Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, -1);
 Adafruit_BME280 bme;
 
-CWifiManager *wifiManager;
-CLEDManager *ledManager;
+CBaseManager *managers[2];
+
+unsigned long tMillis;
 
 int tempInC = EEPROM.read(0);
 float p = 0;
@@ -36,6 +37,7 @@ void setup() {
   //strcpy(configuration.wifi_ssid, "<REDACTED>");
   //strcpy(configuration.wifi_password, "<REDACTED>");
   //EEPROM_saveConfig();
+
 
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -55,53 +57,64 @@ void setup() {
   FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(leds, LED_STRIP_SIZE).setCorrection( TypicalLEDStrip );
   FastLED.setBrightness( LED_BRIGHTNESS );
 
-  wifiManager = new CWifiManager();
-  ledManager = new CLEDManager();
-    
   //currentPalette = RainbowColors_p;
   //currentBlending = LINEARBLEND;
+
+  managers[0] = new CWifiManager();
+  managers[1] = new CLEDManager();
+
+  tMillis = millis();
 }
 
 void loop() {
   display.clearDisplay();
 
-  wifiManager->OLED_Status(&display);
+  // Presentation
+  if (millis() - tMillis > 100) {
+    tMillis = millis();
+    
+    for(auto & manager : managers) {
+      manager->OLED_Status(&display);
+      manager->LED_Status(leds);
+    }
 
-  //
+    //
 
-  // display temperature
-  
-  display.setCursor(0,16);
-  display.print("Temperature: ");
-  display.setTextSize(2);
-  display.setCursor(0,24);
+    // display temperature
+    
+    display.setCursor(0,16);
+    display.print("Temperature: ");
+    display.setTextSize(2);
+    display.setCursor(0,24);
 
 
-  if (digitalRead(BOOT_BUTTON) == LOW) {
-    tempInC = !tempInC;
-    EEPROM.write(0, tempInC);
-  }
+    if (digitalRead(BOOT_BUTTON) == LOW) {
+      tempInC = !tempInC;
+      EEPROM.write(0, tempInC);
+    }
 
-  int temp = bme.readTemperature();
+    int temp = bme.readTemperature();
 
-  display.print(String(tempInC ? temp : (temp*9/5)+32 ));
-  display.print(" ");
-  display.setTextSize(1);
-  display.cp437(true);
-  display.write(167);
-  display.setTextSize(2);
-  display.print(tempInC ? "C" : "F");
-  
-  // display humidity
-  display.setTextSize(1);
-  display.setCursor(0, 40);
-  display.print("Humidity: ");
-  display.setTextSize(2);
-  display.setCursor(0, 48);
-  display.print(String(bme.readHumidity()));
-  display.print(" %"); 
-  
-  display.display();
+    display.print(String(tempInC ? temp : (temp*9/5)+32 ));
+    display.print(" ");
+    display.setTextSize(1);
+    display.cp437(true);
+    display.write(167);
+    display.setTextSize(2);
+    display.print(tempInC ? "C" : "F");
+    
+    // display humidity
+    display.setTextSize(1);
+    display.setCursor(0, 40);
+    display.print("Humidity: ");
+    display.setTextSize(2);
+    display.setCursor(0, 48);
+    display.print(String(bme.readHumidity()));
+    display.print(" %"); 
+    
+    display.display();
+    FastLED.show();
+  }  
 
   //
 
@@ -123,19 +136,14 @@ void loop() {
       if (b<=0) b=255;
   }
 */
-
-  ledManager->ChangePalettePeriodically();
     
-    static uint8_t startIndex = 0;
-    startIndex = startIndex + 1;
-    
-  ledManager->FillLEDsFromPaletteColors(leds, startIndex);
-  
 
   //
 
-  display.display();
-  FastLED.show();
 
-  delay(10);
+  // Post presentation
+  
+  for(auto & manager : managers) {
+    manager->loop();
+  }
 }

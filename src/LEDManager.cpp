@@ -118,3 +118,17 @@ void CLEDManager::ChangePalettePeriodically() {
         if( secondHand == 55)  { currentPalette = myRedWhiteBluePalette_p; currentBlending = LINEARBLEND; }
     }
 }
+
+void CLEDManager::loop() {
+    if (millis() - tMillis > 10) {
+        tMillis = millis();
+        ChangePalettePeriodically();
+        startIndex = startIndex + 1;
+    }
+}
+
+
+uint16_t CLEDManager::LED_Status(CRGB *leds) {
+    FillLEDsFromPaletteColors(leds, startIndex);
+    return 10;
+}

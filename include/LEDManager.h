@@ -8,13 +8,16 @@ class CLEDManager: public CBaseManager {
 
 private:
     unsigned long tMillis;
-
-public:
-	CLEDManager();
+    uint8_t startIndex = 0;
 
     void ChangePalettePeriodically();
     void FillLEDsFromPaletteColors(CRGB *leds, uint8_t colorIndex);
 
+public:
+	CLEDManager();
+
+    virtual uint16_t LED_Status(CRGB *leds);
+    virtual void loop();
 };
 
 #endif

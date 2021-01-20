@@ -30,7 +30,6 @@ static const uint8_t icon_wifi[8] = {
 CWifiManager::CWifiManager() {
 
   tMillis = millis();
-  status = WF_CONNECTING;
   connect();
 }
 
@@ -39,49 +38,31 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
   wl_status_t s = WiFi.status();
   
   oled->setTextSize(1);
+  oled->drawBitmap(0, 0, icon_wifi, 8, 8, 1);
 
-  if (s == WL_CONNECTED) {
-
-    listen();
-
+  if (s == WL_CONNECTED || s == WL_NO_SHIELD) {
     tMillis = millis();
-    oled->drawBitmap(0, 0, icon_wifi, 8, 8, 1);
-
     char buf[100];
     int32_t signalPercentage = dBmtoPercentage(WiFi.RSSI());
 
-    sprintf(buf, "%s %i%%", WiFi.SSID().c_str(), signalPercentage);
+    if (s == WL_CONNECTED) {
+      sprintf(buf, "%s %i%%", WiFi.SSID().c_str(), signalPercentage);
+    } else if (s == WL_NO_SHIELD) {
+      sprintf(buf, "%s (%i)", softAP_SSID, WiFi.softAPgetStationNum());
+    }
+    
     oled->setCursor(10,0);
     oled->print(buf);
 
-    IPAddress ip = WiFi.localIP();
+    IPAddress ip = s == WL_CONNECTED ? WiFi.localIP() : WiFi.softAPIP();
     sprintf(buf, "IP: %s", ip.toString().c_str());
     oled->setCursor(0,8);
     oled->print(buf);
-  } else if(s == WL_NO_SHIELD) {
-
-    listen();
-    
-    tMillis = millis();
-    oled->drawBitmap(0, 0, icon_wifi, 8, 8, 1);
-
-    char buf[100];
-    
-    oled->setCursor(10,0);
-    sprintf(buf, "%s (%i)", softAP_SSID, WiFi.softAPgetStationNum());
-    oled->print(buf);
-
-    IPAddress ip = WiFi.softAPIP();
-    sprintf(buf, "IP: %s", ip.toString().c_str());
-    oled->setCursor(0,8);
-    oled->print(buf);
-
   } else  {
 
     if (status == WF_CONNECTING) {
       unsigned long dt = millis() - tMillis;
-      oled->drawBitmap(0, 0, icon_wifi, 8, 8, 1);
-
+      
       oled->setCursor(10,0);
       oled->print(configuration.wifi_ssid);
       
@@ -108,7 +89,7 @@ void CWifiManager::connect() {
   status = WF_CONNECTING;
   strcpy(softAP_SSID, "");
 
-   if (strlen(configuration.wifi_ssid)) {
+  if (strlen(configuration.wifi_ssid)) {
 
     // Join AP from Config
     Serial.print("Connecting to WiFi ");
@@ -136,25 +117,50 @@ void CWifiManager::connect() {
 
 void CWifiManager::listen() {
 
-  if (status != WF_LISTENING) {
-    status = WF_LISTENING;
-    server.begin(WEB_SERVER_PORT);
-    Serial.print("Web server listening on port "); Serial.println(WEB_SERVER_PORT);
-    return;
-  }
+  status = WF_LISTENING;
+  server.on("/", std::bind(&CWifiManager::handleRoot, this));
+  server.begin(WEB_SERVER_PORT);
+  Serial.print("Web server listening on port "); Serial.println(WEB_SERVER_PORT);
+  
+}
 
-  if (server.hasClient()) {
-    WiFiClient client = server.available();
-    client.setTimeout(2);
-    Serial.print("New client from: "); Serial.println(client.remoteIP());
-    while (client.connected()) {
-      char c = client.read();
-      Serial.write(c);   
+void CWifiManager::loop() {
+  if (WiFi.status() == WL_CONNECTED || WiFi.status() == WL_NO_SHIELD) {
+    if (status != WF_LISTENING) {
+      listen();
+    } else {
+      server.handleClient();
     }
-    client.stop();
-  }  else {
-    Serial.print(".");
+  } else {
+    server.close();
+    status = WF_CONNECTING;
   }
   
-  
+}
+
+void CWifiManager::handleRoot() {
+  char temp[400];
+  int sec = millis() / 1000;
+  int min = sec / 60;
+  int hr = min / 60;
+
+  snprintf(temp, 400,
+
+           "<html>\
+  <head>\
+    <meta http-equiv='refresh' content='5'/>\
+    <title>ESP32 Demo</title>\
+    <style>\
+      body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
+    </style>\
+  </head>\
+  <body>\
+    <h1>Hello from ESP32!</h1>\
+    <p>Uptime: %02d:%02d:%02d</p>\
+  </body>\
+</html>",
+
+           hr, min % 60, sec % 60
+          );
+  server.send(200, "text/html", temp);
 }
