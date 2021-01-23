@@ -10,6 +10,7 @@
 
 #include "Configuration.h"
 #include "WifiManager.h"
+#include "KeypadManager.h"
 #include "InternalLEDManager.h"
 #include "DemoLEDManager.h"
 
@@ -24,7 +25,7 @@ uint8_t r, g, b;
 Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, -1);
 Adafruit_BME280 bme;
 
-CBaseManager *managers[3];
+CBaseManager *managers[4];
 
 unsigned long tMillis;
 
@@ -39,7 +40,6 @@ void setup() {
   //strcpy(configuration.wifi_ssid, "<REDACTED>");
   //strcpy(configuration.wifi_password, "<REDACTED>");
   //EEPROM_saveConfig();
-
 
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -60,9 +60,11 @@ void setup() {
   FastLED.addLeds<LED_EXTERNAL_TYPE, LED_EXTERNAL_PIN, LED_COLOR_ORDER>(ledsExternal, LED_EXTERNAL_STRIP_SIZE).setCorrection( TypicalLEDStrip );
   //FastLED.setBrightness( LED_BRIGHTNESS );
 
-  managers[0] = new CWifiManager();
-  managers[1] = new CInternalLEDManager(LED_STRIP_SIZE, LED_BRIGHTNESS);
-  managers[2] = new CDemoLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS);
+  uint8_t mgrIndex = 0;
+  managers[mgrIndex++] = new CWifiManager();
+  managers[mgrIndex++] = new CKeypadManager();
+  managers[mgrIndex++] = new CInternalLEDManager(LED_STRIP_SIZE, LED_BRIGHTNESS);
+  managers[mgrIndex++] = new CDemoLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS);
 
   tMillis = millis();
 }
@@ -112,11 +114,6 @@ void loop() {
     display.setCursor(0, 48);
     display.print(String(bme.readHumidity()));
     display.print(" %"); 
-
-    display.setTextSize(1);
-    display.setCursor(80, 24);
-    display.print("K: ");
-    display.print(String(analogRead(KEYPAD_PIN)));
 
     display.display();
     FastLED.show();

@@ -24,8 +24,13 @@ int dBmtoPercentage(int dBm) {
   return quality;
 }
 
-static const uint8_t icon_wifi[8] = {
-    0, 0x3c, 0x42, 0x81, 0x3c, 0x42, 0x18, 0x0
+const unsigned char icon_wifi [] PROGMEM = {
+	0x00, 0x00, 0x70, 0x00, 0x7c, 0x00, 0x7f, 0x00, 0x7f, 0x80, 0x0f, 0xc0, 0x63, 0xe0, 0x78, 0xf0, 
+	0x7c, 0x78, 0x7e, 0x38, 0x0f, 0x3c, 0x07, 0x9c, 0x73, 0x9e, 0x73, 0xde, 0x71, 0xce, 0x00, 0x00
+};
+
+const unsigned char icon_ip [] PROGMEM = {
+	0x0, 0xee, 0x49, 0x49, 0x4e, 0x48, 0xe8, 0x0
 };
 
 CWifiManager::CWifiManager() {
@@ -40,7 +45,7 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
   wl_status_t s = WiFi.status();
   
   oled->setTextSize(1);
-  oled->drawBitmap(0, 0, icon_wifi, 8, 8, 1);
+  oled->drawBitmap(0, 0, icon_wifi, 16, 16, 1);
 
   if (s == WL_CONNECTED || s == WL_NO_SHIELD) {
     tMillis = millis();
@@ -53,24 +58,23 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
       sprintf(buf, "%s (%i)", softAP_SSID, WiFi.softAPgetStationNum());
     }
     
-    oled->setCursor(10,0);
+    oled->setCursor(18,0);
     oled->print(buf);
 
-    IPAddress ip = s == WL_CONNECTED ? WiFi.localIP() : WiFi.softAPIP();
-    sprintf(buf, "IP: %s", ip.toString().c_str());
-    oled->setCursor(0,8);
-    oled->print(buf);
+    oled->drawBitmap(18, 8, icon_ip, 8, 8, 1);
+    oled->setCursor(28,8);
+    oled->print((WL_CONNECTED ? WiFi.localIP() : WiFi.softAPIP()).toString().c_str());
   } else  {
 
     if (status == WF_CONNECTING) {
       unsigned long dt = millis() - tMillis;
       
-      oled->setCursor(10,0);
+      oled->setCursor(18,0);
       oled->print(configuration.wifi_ssid);
       
-      oled->drawRect(1, 9, OLED_SCREEN_WIDTH-1, 7, 1);
+      oled->drawRect(18, 9, OLED_SCREEN_WIDTH-1, 7, 1);
 
-      uint8_t w = dt * (OLED_SCREEN_WIDTH-5) / MAX_CONNECT_TIMEOUT_MS;
+      uint8_t w = dt * (OLED_SCREEN_WIDTH-21) / MAX_CONNECT_TIMEOUT_MS;
       if (dt > MAX_CONNECT_TIMEOUT_MS) {
         w = OLED_SCREEN_WIDTH-5;
       }
