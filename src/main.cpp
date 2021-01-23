@@ -10,13 +10,14 @@
 
 #include "Configuration.h"
 #include "WifiManager.h"
-#include "LedManager.h"
+#include "InternalLEDManager.h"
 
 #if !( defined(ESP32) )
   #error This code is intended to run on ESP32 platform! Please check your Tools->Board setting.
 #endif
 
-CRGB leds[LED_STRIP_SIZE];
+CRGB ledsInternal[LED_STRIP_SIZE];
+CRGB ledsExternal[LED_STRIP_SIZE];
 uint8_t r, g, b;
 
 Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, -1);
@@ -54,14 +55,15 @@ void setup() {
   display.clearDisplay();
   display.setTextColor(WHITE);
 
-  FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(leds, LED_STRIP_SIZE).setCorrection( TypicalLEDStrip );
+  FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(ledsInternal, LED_STRIP_SIZE).setCorrection( TypicalLEDStrip );
+  FastLED.addLeds<LED_EXTERNAL_TYPE, LED_EXTERNAL_PIN, LED_COLOR_ORDER>(ledsExternal, LED_EXTERNAL_STRIP_SIZE).setCorrection( TypicalLEDStrip );
   FastLED.setBrightness( LED_BRIGHTNESS );
 
   //currentPalette = RainbowColors_p;
   //currentBlending = LINEARBLEND;
 
   managers[0] = new CWifiManager();
-  managers[1] = new CLEDManager();
+  managers[1] = new CInternalLEDManager(LED_STRIP_SIZE);
 
   tMillis = millis();
 }
@@ -75,7 +77,7 @@ void loop() {
     
     for(auto & manager : managers) {
       manager->OLED_Status(&display);
-      manager->LED_Status(leds);
+      manager->LED_Status(ledsInternal);
     }
 
     //
@@ -111,7 +113,12 @@ void loop() {
     display.setCursor(0, 48);
     display.print(String(bme.readHumidity()));
     display.print(" %"); 
-    
+
+    display.setTextSize(1);
+    display.setCursor(80, 24);
+    display.print("K: ");
+    display.print(String(analogRead(KEYPAD_PIN)));
+
     display.display();
     FastLED.show();
   }  

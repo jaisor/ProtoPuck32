@@ -7,6 +7,7 @@
 #include "Configuration.h"
 
 #define MAX_CONNECT_TIMEOUT_MS 20000
+#define BOARD_LED_PIN 2
 
 const int RSSI_MAX =-50;// define maximum straighten of signal in dBm
 const int RSSI_MIN =-100;// define minimum strength of signal in dBm
@@ -29,6 +30,7 @@ static const uint8_t icon_wifi[8] = {
 
 CWifiManager::CWifiManager() {
 
+  pinMode(BOARD_LED_PIN,OUTPUT);
   tMillis = millis();
   connect();
 }
@@ -89,6 +91,8 @@ void CWifiManager::connect() {
   status = WF_CONNECTING;
   strcpy(softAP_SSID, "");
 
+  digitalWrite(BOARD_LED_PIN, LOW);
+  
   if (strlen(configuration.wifi_ssid)) {
 
     // Join AP from Config
@@ -117,8 +121,11 @@ void CWifiManager::connect() {
 
 void CWifiManager::listen() {
 
+  digitalWrite(BOARD_LED_PIN, HIGH);
+  
   status = WF_LISTENING;
   server.on("/", std::bind(&CWifiManager::handleRoot, this));
+  server.on("/connect", HTTP_POST, std::bind(&CWifiManager::handleConnect, this));
   server.begin(WEB_SERVER_PORT);
   Serial.print("Web server listening on port "); Serial.println(WEB_SERVER_PORT);
   
@@ -139,23 +146,33 @@ void CWifiManager::loop() {
 }
 
 void CWifiManager::handleRoot() {
-  char temp[400];
+  digitalWrite(BOARD_LED_PIN, LOW);
+  
+  char temp[1000];
   int sec = millis() / 1000;
   int min = sec / 60;
   int hr = min / 60;
 
-  snprintf(temp, 400,
+  snprintf(temp, 1000,
 
            "<html>\
   <head>\
-    <meta http-equiv='refresh' content='5'/>\
     <title>ESP32 Demo</title>\
     <style>\
-      body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
+      body { background-color: #303030; font-family: 'Anaheim',sans-serif; Color: #d8d8d8; }\
     </style>\
   </head>\
   <body>\
-    <h1>Hello from ESP32!</h1>\
+    <h1>ProtoPuck32</h1>\
+    <p>Connect to WiFi Access Point (AP)</p>\
+    <form method='POST' action='/connect'>\
+      <label for='ssid'>SSID (AP Name):</label><br>\
+      <input type='text' id='ssid' name='ssid'><br><br>\
+      <label for='pass'>Password (WPA2):</label><br>\
+      <input type='password' id='pass' name='pass' minlength='8' required><br><br>\
+      <input type='submit' value='Connect...'>\
+    </form>\
+    <br><br><hr>\
     <p>Uptime: %02d:%02d:%02d</p>\
   </body>\
 </html>",
@@ -163,4 +180,39 @@ void CWifiManager::handleRoot() {
            hr, min % 60, sec % 60
           );
   server.send(200, "text/html", temp);
+
+  digitalWrite(BOARD_LED_PIN, HIGH);
+  
+}
+
+void CWifiManager::handleConnect() {
+  digitalWrite(BOARD_LED_PIN, LOW);
+  
+  char temp[1000];
+  int sec = millis() / 1000;
+  int min = sec / 60;
+  int hr = min / 60;
+
+  snprintf(temp, 1000,
+
+           "<html>\
+  <head>\
+    <title>ESP32 Demo</title>\
+    <style>\
+      body { background-color: #303030; font-family: 'Anaheim',sans-serif; Color: #d8d8d8; }\
+    </style>\
+  </head>\
+  <body>\
+    <h1>ProtoPuck32</h1>\
+    <p>Connecting...</p>\
+    <p>Uptime: %02d:%02d:%02d</p>\
+  </body>\
+</html>",
+
+           hr, min % 60, sec % 60
+          );
+  server.send(200, "text/html", temp);
+
+  digitalWrite(BOARD_LED_PIN, HIGH);
+  
 }

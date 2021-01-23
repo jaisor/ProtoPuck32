@@ -22,6 +22,7 @@ private:
     void listen();
 
     void handleRoot();
+    void handleConnect();
     
 public:
 	CWifiManager();

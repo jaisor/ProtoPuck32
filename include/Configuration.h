@@ -1,10 +1,13 @@
 #ifndef _CONFIGURATION_H
 #define _CONFIGURATION_H
 
+#include <Arduino.h>
+
 #define WIFI        // 2.4Ghz wifi access point
 #define LED         // Individually addressible LED strip
 #define OLED        // Display
 #define WEATHER     // Temperature, humidity, pressure
+#define KEYPAD      // Buttons
 
 #define BOOT_BUTTON 0
 #define EEPROM_CONFIGURATION_START 10    // First EEPROM byte to be used for storing the configuration
@@ -23,15 +26,28 @@
 
 #ifdef LED
     #define LED_PIN 13
-    #define LED_STRIP_SIZE 484 // 23
-    #define LED_BRIGHTNESS 50
+    #define LED_STRIP_SIZE 484 // 28
+    #define LED_BRIGHTNESS 20
     #define LED_TYPE WS2811
     #define LED_COLOR_ORDER GRB
+
+    #define LED_EXTERNAL    
+    #ifdef LED
+        #define LED_EXTERNAL_PIN 12
+        #define LED_EXTERNAL_STRIP_SIZE 484 // 28
+        #define LED_EXTERNAL_TYPE WS2812B
+        #define LED_EXTERNAL_COLOR_ORDER GRB
+    #endif
+
 #endif
 
 #ifdef OLED
     #define OLED_SCREEN_WIDTH 128 // OLED display width, in pixels
     #define OLED_SCREEN_HEIGHT 64 // OLED display height, in pixels
+#endif
+
+#ifdef KEYPAD
+    #define KEYPAD_PIN 34
 #endif
 
 struct configuration_t
