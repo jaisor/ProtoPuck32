@@ -8,9 +8,10 @@ class CLEDManager: public CBaseManager {
 
 protected:
     uint16_t size;
+    uint8_t brightness;
 
 public:
-	CLEDManager(uint16_t size);
+	CLEDManager(uint16_t size, uint8_t brightness);
 
     virtual uint16_t LED_Status(CRGB *leds) { return 0; };
     virtual void loop() {};

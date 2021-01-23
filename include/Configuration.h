@@ -35,6 +35,7 @@
     #ifdef LED
         #define LED_EXTERNAL_PIN 12
         #define LED_EXTERNAL_STRIP_SIZE 484 // 28
+        #define LED_EXTERNAL_BRIGHTNESS 255
         #define LED_EXTERNAL_TYPE WS2812B
         #define LED_EXTERNAL_COLOR_ORDER GRB
     #endif

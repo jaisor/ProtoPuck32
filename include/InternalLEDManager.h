@@ -10,7 +10,7 @@ private:
     unsigned long tMillis;
 
 public:
-	CInternalLEDManager(uint16_t size);
+	CInternalLEDManager(uint16_t size, uint8_t brightness);
 
     virtual uint16_t LED_Status(CRGB *leds);
     virtual void loop();

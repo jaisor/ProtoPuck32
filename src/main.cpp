@@ -11,19 +11,20 @@
 #include "Configuration.h"
 #include "WifiManager.h"
 #include "InternalLEDManager.h"
+#include "DemoLEDManager.h"
 
 #if !( defined(ESP32) )
   #error This code is intended to run on ESP32 platform! Please check your Tools->Board setting.
 #endif
 
 CRGB ledsInternal[LED_STRIP_SIZE];
-CRGB ledsExternal[LED_STRIP_SIZE];
+CRGB ledsExternal[LED_EXTERNAL_STRIP_SIZE];
 uint8_t r, g, b;
 
 Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, -1);
 Adafruit_BME280 bme;
 
-CBaseManager *managers[2];
+CBaseManager *managers[3];
 
 unsigned long tMillis;
 
@@ -57,13 +58,11 @@ void setup() {
 
   FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(ledsInternal, LED_STRIP_SIZE).setCorrection( TypicalLEDStrip );
   FastLED.addLeds<LED_EXTERNAL_TYPE, LED_EXTERNAL_PIN, LED_COLOR_ORDER>(ledsExternal, LED_EXTERNAL_STRIP_SIZE).setCorrection( TypicalLEDStrip );
-  FastLED.setBrightness( LED_BRIGHTNESS );
-
-  //currentPalette = RainbowColors_p;
-  //currentBlending = LINEARBLEND;
+  //FastLED.setBrightness( LED_BRIGHTNESS );
 
   managers[0] = new CWifiManager();
-  managers[1] = new CInternalLEDManager(LED_STRIP_SIZE);
+  managers[1] = new CInternalLEDManager(LED_STRIP_SIZE, LED_BRIGHTNESS);
+  managers[2] = new CDemoLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS);
 
   tMillis = millis();
 }
@@ -122,31 +121,6 @@ void loop() {
     display.display();
     FastLED.show();
   }  
-
-  //
-
-/*
-  for( int i = 0; i < LED_STRIP_SIZE; i++) {
-      //leds[i] = CRGB(245, 5, 37);
-      leds[i] = CRGB(r, g, b);
-
-      r += random(-2,2);
-      g += random(-2,2);
-      b += random(-2,2);
-
-      if (r>=255) r=0;
-      if (g>=255) g=0;
-      if (b>=255) b=0;
-
-      if (r<=0) r=255;
-      if (g<=0) g=255;
-      if (b<=0) b=255;
-  }
-*/
-    
-
-  //
-
 
   // Post presentation
   
