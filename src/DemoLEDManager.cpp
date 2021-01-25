@@ -8,10 +8,6 @@ TBlendType    currentBlending;
 extern CRGBPalette16 myRedWhiteBluePalette;
 extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
 
-// This example shows how to set up a static color palette
-// which is stored in PROGMEM (flash), which is almost always more
-// plentiful than RAM.  A static PROGMEM palette like this
-// takes up 64 bytes of flash.
 const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM =
 {
     CRGB::Red,
@@ -38,8 +34,8 @@ const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM =
 void CDemoLEDManager::FillLEDsFromPaletteColors(CRGB *leds, uint8_t colorIndex)
 {
     for( int i = 0; i < size; i++) {
-        //leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
-        leds[i] = ColorFromPalette( PartyColors_p, colorIndex, brightness, currentBlending);
+        leds[i] = ColorFromPalette( palettes[currentPaletteIndex], colorIndex, brightness, currentBlending);
+        //leds[i] = ColorFromPalette( PartyColors_p, colorIndex, brightness, currentBlending);
         colorIndex += 1;
     }
 }
@@ -88,17 +84,32 @@ CDemoLEDManager::CDemoLEDManager(CRGB *leds, uint16_t size, uint8_t brightness)
 
     this->leds = leds;
 
-    tMillis = millis();
+    tMillis = tMillsChangePalette = millis();
+    changePalette = 0;
 
     CRGB purple = CHSV( HUE_PURPLE, 255, 255);
     CRGB green  = CHSV( HUE_GREEN, 255, 255);
     CRGB black  = CRGB::Black;
 
-    currentPalette = CRGBPalette16(
-                                    green,  green,  black,  black,
-                                    purple, purple, black,  black,
-                                    green,  green,  black,  black,
-                                    purple, purple, black,  black );
+    palettes.push_back(
+        CRGBPalette16(
+            green,  green,  black,  black,
+            purple, purple, black,  black,
+            green,  green,  black,  black,
+            purple, purple, black,  black )
+    );
+
+    palettes.push_back(RainbowColors_p);
+    palettes.push_back(RainbowStripeColors_p);
+    palettes.push_back(RainbowStripeColors_p);
+    palettes.push_back(CloudColors_p);
+    palettes.push_back(PartyColors_p);
+    palettes.push_back(LavaColors_p);
+    palettes.push_back(OceanColors_p);
+    palettes.push_back(ForestColors_p);
+    palettes.push_back(HeatColors_p);
+
+    currentPaletteIndex = 0;
 }
 
 void CDemoLEDManager::ChangePalettePeriodically() {
@@ -124,13 +135,33 @@ void CDemoLEDManager::ChangePalettePeriodically() {
 void CDemoLEDManager::loop() {
     if (millis() - tMillis > 50) {
         tMillis = millis();
-        ChangePalettePeriodically();
+        //ChangePalettePeriodically();
         startIndex = startIndex + 1;
     }
+
+    if (millis() - tMillsChangePalette > 500) {
+        tMillsChangePalette = millis();
+        currentPaletteIndex += changePalette;
+        if (currentPaletteIndex >= palettes.size()) {
+            currentPaletteIndex = 0;
+        }
+        changePalette = 0;
+    }
+    
 }
 
 
 uint16_t CDemoLEDManager::LED_Status(CRGB *leds) {
     FillLEDsFromPaletteColors(this->leds, startIndex);
     return 10;
+}
+
+void CDemoLEDManager::keyEvent(key_status_t key) {
+
+    switch (key) {
+        case KEY_LEFT: changePalette = 1; break;
+        case KEY_RIGHT: changePalette = -1; break;
+        default: ;
+    }
+
 }

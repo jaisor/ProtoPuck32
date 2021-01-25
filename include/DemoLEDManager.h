@@ -7,10 +7,14 @@
 class CDemoLEDManager: public CLEDManager {
 
 private:
-    unsigned long tMillis;
+    unsigned long tMillis, tMillsChangePalette;
     uint8_t startIndex = 0;
 
     CRGB *leds;
+
+    std::vector<CRGBPalette16> palettes;
+    uint8_t currentPaletteIndex;
+    uint8_t changePalette;
 
     void ChangePalettePeriodically();
     void FillLEDsFromPaletteColors(CRGB *leds, uint8_t colorIndex);
@@ -20,6 +24,8 @@ public:
 
     virtual uint16_t LED_Status(CRGB *leds);
     virtual void loop();
+
+    virtual void keyEvent(key_status_t key);
 };
 
 #endif
