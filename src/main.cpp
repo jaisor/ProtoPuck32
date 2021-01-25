@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include <functional>
+
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -41,6 +43,7 @@ void setup() {
   //strcpy(configuration.wifi_password, "<REDACTED>");
   //EEPROM_saveConfig();
 
+
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;);
@@ -62,9 +65,19 @@ void setup() {
 
   uint8_t mgrIndex = 0;
   managers[mgrIndex++] = new CWifiManager();
-  managers[mgrIndex++] = new CKeypadManager();
-  managers[mgrIndex++] = new CInternalLEDManager(LED_STRIP_SIZE, LED_BRIGHTNESS);
   managers[mgrIndex++] = new CDemoLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS);
+  managers[mgrIndex++] = new CInternalLEDManager(LED_STRIP_SIZE, LED_BRIGHTNESS);
+  CKeypadManager *keypadManager = new CKeypadManager();
+  managers[mgrIndex++] = keypadManager;
+
+  using std::placeholders::_1;
+  for(auto & manager : managers) {
+    keypadManager->addKeyListener(std::bind(&CBaseManager::keyEvent, manager, _1));
+  }
+  //auto p = std::bind(&CInternalLEDManager::keyEvent, ledManager);
+  //keypadManager->addKeyListener(p);
+  
+
 
   tMillis = millis();
 }
@@ -112,8 +125,8 @@ void loop() {
     display.print("Humidity: ");
     display.setTextSize(2);
     display.setCursor(0, 48);
-    display.print(String(bme.readHumidity()));
-    display.print(" %"); 
+    display.print(String(bme.readHumidity(), 1));
+    display.print("%"); 
 
     display.display();
     FastLED.show();

@@ -38,8 +38,9 @@ const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM =
 void CDemoLEDManager::FillLEDsFromPaletteColors(CRGB *leds, uint8_t colorIndex)
 {
     for( int i = 0; i < size; i++) {
-        leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
-        colorIndex += 3;
+        //leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
+        leds[i] = ColorFromPalette( PartyColors_p, colorIndex, brightness, currentBlending);
+        colorIndex += 1;
     }
 }
 
@@ -101,7 +102,7 @@ CDemoLEDManager::CDemoLEDManager(CRGB *leds, uint16_t size, uint8_t brightness)
 }
 
 void CDemoLEDManager::ChangePalettePeriodically() {
-    uint8_t secondHand = (millis() / 1000) % 60;
+    uint8_t secondHand = (millis() / 2000) % 60;
     static uint8_t lastSecond = 99;
     
     if( lastSecond != secondHand) {
@@ -121,7 +122,7 @@ void CDemoLEDManager::ChangePalettePeriodically() {
 }
 
 void CDemoLEDManager::loop() {
-    if (millis() - tMillis > 10) {
+    if (millis() - tMillis > 50) {
         tMillis = millis();
         ChangePalettePeriodically();
         startIndex = startIndex + 1;

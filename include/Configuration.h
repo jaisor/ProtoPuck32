@@ -27,7 +27,7 @@
 #ifdef LED
     #define LED_PIN 13
     #define LED_STRIP_SIZE 484 // 28
-    #define LED_BRIGHTNESS 20
+    #define LED_BRIGHTNESS 5
     #define LED_TYPE WS2811
     #define LED_COLOR_ORDER GRB
 
@@ -35,7 +35,7 @@
     #ifdef LED
         #define LED_EXTERNAL_PIN 12
         #define LED_EXTERNAL_STRIP_SIZE 484 // 28
-        #define LED_EXTERNAL_BRIGHTNESS 255
+        #define LED_EXTERNAL_BRIGHTNESS 50
         #define LED_EXTERNAL_TYPE WS2812B
         #define LED_EXTERNAL_COLOR_ORDER GRB
     #endif
@@ -51,8 +51,7 @@
     #define KEYPAD_PIN 34
 #endif
 
-struct configuration_t
-{
+struct configuration_t {
     #ifdef WIFI
         char wifi_ssid[32];
         char wifi_password[63];

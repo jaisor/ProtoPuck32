@@ -8,7 +8,8 @@ class CLEDManager: public CBaseManager {
 
 protected:
     uint16_t size;
-    uint8_t brightness;
+    float_t brightness;
+    float_t brightnessChange;
 
 public:
 	CLEDManager(uint16_t size, uint8_t brightness);
