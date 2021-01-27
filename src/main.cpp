@@ -14,7 +14,12 @@
 #include "WifiManager.h"
 #include "KeypadManager.h"
 #include "InternalLEDManager.h"
-#include "DemoLEDManager.h"
+
+#ifdef LED_EXTERNAL_MATRIX
+  #include "MatrixLEDManager.h"
+#else
+  #include "DemoLEDManager.h"
+#endif
 
 #if !( defined(ESP32) )
   #error This code is intended to run on ESP32 platform! Please check your Tools->Board setting.
@@ -50,7 +55,6 @@ void setup() {
   //strcpy(configuration.wifiPassword, "<REDACTED>");
   //EEPROM_saveConfig();
 
-
 #ifdef OLED
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -77,13 +81,20 @@ void setup() {
 #endif
 
   uint8_t mgrIndex = 0;
+
 #ifdef WIFI
   managers[mgrIndex++] = new CWifiManager();
 #endif
+
 #ifdef LED
-  managers[mgrIndex++] = new CDemoLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS);
   managers[mgrIndex++] = new CInternalLEDManager(LED_STRIP_SIZE, configuration.ledBrightness);
+  #ifdef LED_EXTERNAL_MATRIX
+    managers[mgrIndex++] = new CMatrixLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_MATRIX_WIDTH, LED_EXTERNAL_MATRIX_HEIGHT, LED_EXTERNAL_BRIGHTNESS); 
+  #else
+    managers[mgrIndex++] = new CDemoLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS); 
+  #endif
 #endif
+
 #ifdef KEYPAD
   CKeypadManager *keypadManager = new CKeypadManager();
   managers[mgrIndex++] = keypadManager;
@@ -95,7 +106,6 @@ void setup() {
     }
   }
 #endif
-
   
   tMillis = millis();
 }
@@ -122,7 +132,7 @@ void loop() {
 
     // display temperature
   #ifdef OLED
-    
+    /*
     display.setCursor(0,16);
     display.print("Temperature: ");
     display.setTextSize(2);
@@ -152,6 +162,7 @@ void loop() {
     display.setCursor(0, 48);
     display.print(String(bme.readHumidity(), 1));
     display.print("%"); 
+    */
 
     display.display();
   #endif

@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include "DemoLEDManager.h"
-#include "Configuration.h"
 
 CRGBPalette16 currentPalette;
 TBlendType    currentBlending;
