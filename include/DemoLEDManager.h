@@ -1,8 +1,11 @@
 #ifndef _DEMO_LED_MANAGER_H
 #define _DEMO_LED_MANAGER_H
 
-#include <FastLED.h>
 #include "LEDManager.h"
+
+#ifdef LED
+    #include <FastLED.h>
+#endif
 
 class CDemoLEDManager: public CLEDManager {
 
@@ -20,12 +23,16 @@ private:
     void FillLEDsFromPaletteColors(CRGB *leds, uint8_t colorIndex);
 
 public:
-	CDemoLEDManager(CRGB *leds, uint16_t size, uint8_t brightness);
+	CDemoLEDManager(CRGB *leds, uint16_t size, float brightness);
 
+#ifdef LED
     virtual uint16_t LED_Status(CRGB *leds);
-    virtual void loop();
-
+#endif
+#ifdef KEYPAD
     virtual void keyEvent(key_status_t key);
+#endif
+
+    virtual void loop();
 };
 
 #endif

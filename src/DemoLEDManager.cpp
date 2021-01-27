@@ -34,7 +34,7 @@ const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM =
 void CDemoLEDManager::FillLEDsFromPaletteColors(CRGB *leds, uint8_t colorIndex)
 {
     for( int i = 0; i < size; i++) {
-        leds[i] = ColorFromPalette( palettes[currentPaletteIndex], colorIndex, brightness, currentBlending);
+        leds[i] = ColorFromPalette( palettes[currentPaletteIndex], colorIndex, brightness * 255, currentBlending);
         //leds[i] = ColorFromPalette( PartyColors_p, colorIndex, brightness, currentBlending);
         colorIndex += 1;
     }
@@ -79,7 +79,7 @@ void SetupPurpleAndGreenPalette()
                                    purple, purple, black,  black );
 }
 
-CDemoLEDManager::CDemoLEDManager(CRGB *leds, uint16_t size, uint8_t brightness)
+CDemoLEDManager::CDemoLEDManager(CRGB *leds, uint16_t size, float brightness)
 : CLEDManager(size, brightness) {
 
     this->leds = leds;

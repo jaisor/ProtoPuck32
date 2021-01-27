@@ -1,8 +1,15 @@
 #ifndef _BASE_MANAGER_H
 #define _BASE_MANAGER_H
 
-#include <Adafruit_GFX.h>
-#include <FastLED.h>
+#include "Configuration.h"
+
+#ifdef LED
+    #include <FastLED.h>
+#endif
+#ifdef OLED
+    #include <Adafruit_GFX.h>
+#endif
+
 
 typedef enum {
     KEY_NONE = 0,
@@ -15,11 +22,19 @@ typedef enum {
 
 
 class CBaseManager {
+
 public:
-    // Return value is the recommended refresh delay in ms
-	virtual uint16_t LED_Status(CRGB *leds) { return 0; };
+
+#ifdef LED
+    virtual uint16_t LED_Status(CRGB *leds) { return 0; };
+#endif
+#ifdef OLED
     virtual uint16_t OLED_Status(Adafruit_GFX *oled) { return 0; };
+#endif
+#ifdef KEYPAD
     virtual void keyEvent(key_status_t key) { };
+#endif
+
     virtual void loop() {};
 };
 

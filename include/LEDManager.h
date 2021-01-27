@@ -1,8 +1,10 @@
 #ifndef _LED_MANAGER_H
 #define _LED_MANAGER_H
 
-#include <FastLED.h>
 #include "BaseManager.h"
+#ifdef LED
+    #include <FastLED.h>
+#endif
 
 class CLEDManager: public CBaseManager {
 
@@ -14,7 +16,10 @@ protected:
 public:
 	CLEDManager(uint16_t size, uint8_t brightness);
 
+#ifdef LED
     virtual uint16_t LED_Status(CRGB *leds) { return 0; };
+#endif
+
     virtual void loop() {};
 };
 

@@ -20,12 +20,19 @@
   #error This code is intended to run on ESP32 platform! Please check your Tools->Board setting.
 #endif
 
-CRGB ledsInternal[LED_STRIP_SIZE];
-CRGB ledsExternal[LED_EXTERNAL_STRIP_SIZE];
-uint8_t r, g, b;
+#ifdef LED
+  CRGB ledsInternal[LED_STRIP_SIZE];
+  CRGB ledsExternal[LED_EXTERNAL_STRIP_SIZE];
+  uint8_t r, g, b;
+#endif
 
-Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, -1);
-Adafruit_BME280 bme;
+#ifdef OLED
+  Adafruit_SSD1306 display(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &Wire, -1);
+#endif
+
+#ifdef TEMP_SENSOR
+  Adafruit_BME280 bme;
+#endif
 
 CBaseManager *managers[4];
 
@@ -39,15 +46,17 @@ void setup() {
 
   EEPROM_loadConfig();
 
-  //strcpy(configuration.wifi_ssid, "<REDACTED>");
-  //strcpy(configuration.wifi_password, "<REDACTED>");
+  //strcpy(configuration.wifiSsid, "<REDACTED>");
+  //strcpy(configuration.wifiPassword, "<REDACTED>");
   //EEPROM_saveConfig();
 
 
+#ifdef OLED
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;);
   }
+#endif
   
   bool status = bme.begin(0x76);  
   if (!status) {
@@ -55,48 +64,64 @@ void setup() {
     while (1);
   }
   
-  delay(2000);
+  delay(100);
+
+#ifdef OLED
   display.clearDisplay();
   display.setTextColor(WHITE);
+#endif
 
+#ifdef LED
   FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(ledsInternal, LED_STRIP_SIZE).setCorrection( TypicalLEDStrip );
   FastLED.addLeds<LED_EXTERNAL_TYPE, LED_EXTERNAL_PIN, LED_COLOR_ORDER>(ledsExternal, LED_EXTERNAL_STRIP_SIZE).setCorrection( TypicalLEDStrip );
-  //FastLED.setBrightness( LED_BRIGHTNESS );
+#endif
 
   uint8_t mgrIndex = 0;
+#ifdef WIFI
   managers[mgrIndex++] = new CWifiManager();
+#endif
+#ifdef LED
   managers[mgrIndex++] = new CDemoLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS);
-  managers[mgrIndex++] = new CInternalLEDManager(LED_STRIP_SIZE, LED_BRIGHTNESS);
+  managers[mgrIndex++] = new CInternalLEDManager(LED_STRIP_SIZE, configuration.ledBrightness);
+#endif
+#ifdef KEYPAD
   CKeypadManager *keypadManager = new CKeypadManager();
   managers[mgrIndex++] = keypadManager;
 
   using std::placeholders::_1;
   for(auto & manager : managers) {
-    keypadManager->addKeyListener(std::bind(&CBaseManager::keyEvent, manager, _1));
+    if (manager) {
+      keypadManager->addKeyListener(std::bind(&CBaseManager::keyEvent, manager, _1));
+    }
   }
-  //auto p = std::bind(&CInternalLEDManager::keyEvent, ledManager);
-  //keypadManager->addKeyListener(p);
+#endif
+
   
-
-
   tMillis = millis();
 }
 
 void loop() {
-  display.clearDisplay();
+  #ifdef OLED
+    display.clearDisplay();
+  #endif
 
   // Presentation
   if (millis() - tMillis > 100) {
     tMillis = millis();
     
     for(auto & manager : managers) {
-      manager->OLED_Status(&display);
-      manager->LED_Status(ledsInternal);
+      #ifdef OLED
+        manager->OLED_Status(&display);
+      #endif
+      #ifdef LED
+        manager->LED_Status(ledsInternal);
+      #endif
     }
 
     //
 
     // display temperature
+  #ifdef OLED
     
     display.setCursor(0,16);
     display.print("Temperature: ");
@@ -129,7 +154,11 @@ void loop() {
     display.print("%"); 
 
     display.display();
+  #endif
+
+  #ifdef LED
     FastLED.show();
+  #endif
   }  
 
   // Post presentation

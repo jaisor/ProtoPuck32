@@ -3,6 +3,8 @@
 #endif
 
 #include <Arduino.h>
+#include <WiFiClient.h>
+
 #include "WifiManager.h"
 #include "Configuration.h"
 
@@ -11,6 +13,8 @@
 
 const int RSSI_MAX =-50;// define maximum straighten of signal in dBm
 const int RSSI_MIN =-100;// define minimum strength of signal in dBm
+
+WiFiClient espClient;
 
 int dBmtoPercentage(int dBm) {
   int quality;
@@ -33,13 +37,35 @@ const unsigned char icon_ip [] PROGMEM = {
 	0x0, 0xee, 0x49, 0x49, 0x4e, 0x48, 0xe8, 0x0
 };
 
-CWifiManager::CWifiManager() {
+void handle_mqtt_message(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  char message[50];
 
+  /*
+  ByteToChar(payload, message, length);
+  Serial.println(message);
+
+  if (!strcmp(topic, "redacted")) {
+    handle_redled(message, length);
+  }
+
+  if (!strcmp(topic, "redacted")) {
+    handle_relay(message, length);
+  }
+  */
+}
+
+CWifiManager::CWifiManager() {    
   pinMode(BOARD_LED_PIN,OUTPUT);
   tMillis = millis();
   connect();
+
+  this->client.setClient(espClient);
 }
 
+#ifdef OLED
 uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
 
   wl_status_t s = WiFi.status();
@@ -72,14 +98,14 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
       unsigned long dt = millis() - tMillis;
       
       oled->setCursor(18,0);
-      oled->print(configuration.wifi_ssid);
+      oled->print(configuration.wifiSsid);
       
       oled->drawRect(18, 9, OLED_SCREEN_WIDTH-19, 7, 1);
 
       uint8_t w = dt * (OLED_SCREEN_WIDTH-21) / MAX_CONNECT_TIMEOUT_MS;
       if (dt > MAX_CONNECT_TIMEOUT_MS) {
         w = OLED_SCREEN_WIDTH-21;
-        strcpy(configuration.wifi_ssid, "");
+        strcpy(configuration.wifiSsid, "");
         tMillis = millis();
         connect();
       }
@@ -94,6 +120,7 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
 
   return 100;
 }
+#endif
 
 void CWifiManager::connect() {
 
@@ -102,12 +129,12 @@ void CWifiManager::connect() {
 
   digitalWrite(BOARD_LED_PIN, LOW);
   
-  if (strlen(configuration.wifi_ssid)) {
+  if (strlen(configuration.wifiSsid)) {
 
     // Join AP from Config
     Serial.print("Connecting to WiFi ");
-    Serial.println(configuration.wifi_ssid);
-    WiFi.begin(configuration.wifi_ssid, configuration.wifi_password);
+    Serial.println(configuration.wifiSsid);
+    WiFi.begin(configuration.wifiSsid, configuration.wifiPassword);
     
   } else {
 
@@ -131,12 +158,17 @@ void CWifiManager::connect() {
 void CWifiManager::listen() {
 
   digitalWrite(BOARD_LED_PIN, HIGH);
-  
   status = WF_LISTENING;
+
+  // Web
   server.on("/", std::bind(&CWifiManager::handleRoot, this));
   server.on("/connect", HTTP_POST, std::bind(&CWifiManager::handleConnect, this));
   server.begin(WEB_SERVER_PORT);
   Serial.print("Web server listening on port "); Serial.println(WEB_SERVER_PORT);
+
+  // MQTT
+  client.setServer("192.168.10.10", 1883);
+  client.setCallback(handle_mqtt_message);
   
 }
 

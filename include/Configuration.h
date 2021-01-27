@@ -6,7 +6,7 @@
 #define WIFI        // 2.4Ghz wifi access point
 #define LED         // Individually addressible LED strip
 #define OLED        // Display
-#define WEATHER     // Temperature, humidity, pressure
+#define TEMP_SENSOR // Temperature, humidity, pressure
 #define KEYPAD      // Buttons
 
 #define BOOT_BUTTON 0
@@ -26,16 +26,16 @@
 
 #ifdef LED
     #define LED_PIN 13
-    #define LED_STRIP_SIZE 484 // 28
-    #define LED_BRIGHTNESS 5
+    #define LED_STRIP_SIZE 28
+    #define LED_BRIGHTNESS 0.5 // 0-1
     #define LED_TYPE WS2811
     #define LED_COLOR_ORDER GRB
 
     #define LED_EXTERNAL    
-    #ifdef LED
+    #ifdef LED_EXTERNAL
         #define LED_EXTERNAL_PIN 12
         #define LED_EXTERNAL_STRIP_SIZE 484 // 28
-        #define LED_EXTERNAL_BRIGHTNESS 50
+        #define LED_EXTERNAL_BRIGHTNESS 0.5 // 0-1
         #define LED_EXTERNAL_TYPE WS2812B
         #define LED_EXTERNAL_COLOR_ORDER GRB
     #endif
@@ -52,9 +52,16 @@
 #endif
 
 struct configuration_t {
+
+    bool _loaded; // used to check if EEPROM was empty, should be true
+
     #ifdef WIFI
-        char wifi_ssid[32];
-        char wifi_password[63];
+        char wifiSsid[32];
+        char wifiPassword[63];
+    #endif
+
+    #ifdef LED
+        float ledBrightness;
     #endif
 };
 

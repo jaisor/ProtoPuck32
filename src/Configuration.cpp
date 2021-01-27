@@ -10,6 +10,14 @@ void EEPROM_saveConfig() {
 
 void EEPROM_loadConfig() {
   EEPROM.get(EEPROM_CONFIGURATION_START, configuration);
+
+  if (!configuration._loaded) {
+    // blank
+    Serial.println("Configuration was blank, loading defaults");
+    #ifdef LED
+      configuration.ledBrightness = LED_BRIGHTNESS;
+    #endif
+  }
 }
 
 void EEPROM_wipe() {

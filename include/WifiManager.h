@@ -3,6 +3,7 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <PubSubClient.h>
 #include "BaseManager.h"
 
 typedef enum {
@@ -16,7 +17,9 @@ private:
     unsigned long tMillis;
     wifi_status status;
     char softAP_SSID[32];
+
     WebServer server;
+    PubSubClient client;
 
     void connect();
     void listen();
@@ -26,7 +29,9 @@ private:
     
 public:
 	CWifiManager();
+#ifdef OLED
     virtual uint16_t OLED_Status(Adafruit_GFX *oled);
+#endif
     virtual void loop();
 
 };

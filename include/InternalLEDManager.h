@@ -10,12 +10,19 @@ private:
     unsigned long tMillis;
 
 public:
-	CInternalLEDManager(uint16_t size, uint8_t brightness);
+	CInternalLEDManager(uint16_t size, float brightness);
 
+#ifdef OLED
     virtual uint16_t OLED_Status(Adafruit_GFX *oled);
+#endif
+#ifdef LED
     virtual uint16_t LED_Status(CRGB *leds);
-    virtual void loop();
+#endif
+#ifdef KEYPAD
     virtual void keyEvent(key_status_t key);
+#endif
+
+    virtual void loop();
 };
 
 #endif

@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include "KeypadManager.h"
-#include "Configuration.h"
 
 const unsigned char key_bitmaps [6][8] PROGMEM = {
     { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, // NONE
@@ -17,6 +16,7 @@ CKeypadManager::CKeypadManager() {
     listener = nullptr;
 }
 
+#ifdef OLED
 uint16_t CKeypadManager::OLED_Status(Adafruit_GFX *oled) {
 
     oled->setTextSize(1);
@@ -28,6 +28,7 @@ uint16_t CKeypadManager::OLED_Status(Adafruit_GFX *oled) {
 
     return 100;
 }
+#endif
 
 void CKeypadManager::loop() {
 
@@ -35,13 +36,13 @@ void CKeypadManager::loop() {
     if (k > 4000) {
         keyStatus = KEY_NONE;
     } else if (k > 2300 && k < 2500) {
-        keyStatus = KEY_UP;
-    } else if (k < 100) {
-        keyStatus = KEY_DOWN;
-    } else if (k > 2600 && k < 3000) {
         keyStatus = KEY_LEFT;
-    } else if (k > 140 && k < 1600) {
+    } else if (k < 300) {
         keyStatus = KEY_RIGHT;
+    } else if (k > 2600 && k < 3000) {
+        keyStatus = KEY_DOWN;
+    } else if (k > 1000 && k < 1600) {
+        keyStatus = KEY_UP;
     } else if (k > 3200 && k < 3400) {
         keyStatus = KEY_MIDDLE;
     } 

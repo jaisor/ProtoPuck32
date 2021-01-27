@@ -17,9 +17,11 @@ public:
 
 	CKeypadManager();
 
+#ifdef OLED
     virtual uint16_t OLED_Status(Adafruit_GFX *oled);
-    virtual void loop();
+#endif
 
+    virtual void loop();
     void addKeyListener(TKeyListener listener);
 
 private:
