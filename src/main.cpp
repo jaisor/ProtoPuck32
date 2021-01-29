@@ -55,6 +55,7 @@ void setup() {
   //strcpy(configuration.wifiPassword, "<REDACTED>");
   //EEPROM_saveConfig();
 
+
 #ifdef OLED
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -132,7 +133,7 @@ void loop() {
 
     // display temperature
   #ifdef OLED
-    /*
+    
     display.setCursor(0,16);
     display.print("Temperature: ");
     display.setTextSize(2);
@@ -162,7 +163,6 @@ void loop() {
     display.setCursor(0, 48);
     display.print(String(bme.readHumidity(), 1));
     display.print("%"); 
-    */
 
     display.display();
   #endif

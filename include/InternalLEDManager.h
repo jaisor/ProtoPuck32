@@ -7,7 +7,11 @@ class CInternalLEDManager: public CLEDManager {
 
 private:
     uint8_t startIndex = 0;
-    unsigned long tMillis;
+    unsigned long tMillis, tMillsChangePalette;
+
+    std::vector<CRGBPalette16> palettes;
+    uint8_t currentPaletteIndex;
+    uint8_t changePalette;
 
 public:
 	CInternalLEDManager(uint16_t size, float brightness);

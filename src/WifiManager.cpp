@@ -4,11 +4,12 @@
 
 #include <Arduino.h>
 #include <WiFiClient.h>
+#include <esp_wifi.h>
 
 #include "WifiManager.h"
 #include "Configuration.h"
 
-#define MAX_CONNECT_TIMEOUT_MS 10000 // 10 seconds to connect before creating its own AP
+#define MAX_CONNECT_TIMEOUT_MS 4000 // 10 seconds to connect before creating its own AP
 #define BOARD_LED_PIN 2
 
 const int RSSI_MAX =-50;// define maximum straighten of signal in dBm
@@ -59,10 +60,10 @@ void handle_mqtt_message(char* topic, byte* payload, unsigned int length) {
 
 CWifiManager::CWifiManager() {    
   pinMode(BOARD_LED_PIN,OUTPUT);
-  tMillis = millis();
-  connect();
-
   this->client.setClient(espClient);
+  strcpy(SSID, configuration.wifiSsid);
+
+  connect();
 }
 
 #ifdef OLED
@@ -73,16 +74,20 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
   oled->setTextSize(1);
   oled->drawBitmap(0, 0, icon_wifi, 16, 16, 1);
 
-  //Serial.print("Status:"); Serial.println(String(s));
-  if (s == WL_CONNECTED || s == WL_NO_SHIELD) {
+  wifi_mode_t espm;
+  esp_wifi_get_mode(&espm);
 
-    tMillis = millis();
+  //Serial.print("Status:"); Serial.println(String(s));
+  if (s == WL_CONNECTED || espm == WIFI_MODE_AP || espm == WIFI_MODE_APSTA) {
+
+    digitalWrite(BOARD_LED_PIN, status == WF_LISTENING ? HIGH : LOW);
+
     char buf[100];
     int32_t signalPercentage = dBmtoPercentage(WiFi.RSSI());
 
     if (s == WL_CONNECTED) {
       sprintf(buf, "%s %i%%", WiFi.SSID().c_str(), signalPercentage);
-    } else if (s == WL_NO_SHIELD) {
+    } else if (espm == WIFI_MODE_AP || espm == WIFI_MODE_APSTA) {
       sprintf(buf, "%s (%i)", softAP_SSID, WiFi.softAPgetStationNum());
     }
     
@@ -91,30 +96,28 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
 
     oled->drawBitmap(18, 8, icon_ip, 8, 8, 1);
     oled->setCursor(28,8);
-    oled->print((WL_CONNECTED ? WiFi.localIP() : WiFi.softAPIP()).toString().c_str());
-  } else  {
+    oled->print((s == WL_CONNECTED ? WiFi.localIP() : WiFi.softAPIP()).toString().c_str());
 
-    if (status == WF_CONNECTING) {
-      unsigned long dt = millis() - tMillis;
-      
-      oled->setCursor(18,0);
-      oled->print(configuration.wifiSsid);
-      
-      oled->drawRect(18, 9, OLED_SCREEN_WIDTH-19, 7, 1);
+  } else if (status == WF_CONNECTING) {
 
-      uint8_t w = dt * (OLED_SCREEN_WIDTH-21) / MAX_CONNECT_TIMEOUT_MS;
-      if (dt > MAX_CONNECT_TIMEOUT_MS) {
-        w = OLED_SCREEN_WIDTH-21;
-        strcpy(configuration.wifiSsid, "");
-        tMillis = millis();
-        connect();
-      }
-      oled->fillRect(20, 11, w, 3, 1);
-    } else {
-      connect();
+    unsigned long dt = millis() - tMillis;
+    
+    oled->setCursor(18,0);
+    oled->print(SSID);
+    
+    oled->drawRect(18, 9, OLED_SCREEN_WIDTH-19, 7, 1);
+
+    uint8_t w = dt * (OLED_SCREEN_WIDTH-21) / MAX_CONNECT_TIMEOUT_MS;
+    if (dt >= MAX_CONNECT_TIMEOUT_MS) {
+      w = OLED_SCREEN_WIDTH-22;
     }
+    oled->fillRect(20, 11, w, 3, 1);
 
-  }  
+    digitalWrite(BOARD_LED_PIN, dt % 100 ? LOW : HIGH);
+  }  else {
+    digitalWrite(BOARD_LED_PIN, LOW);
+    Serial.print("Status:"); Serial.println(String(s));
+  }
   
   //
 
@@ -126,15 +129,14 @@ void CWifiManager::connect() {
 
   status = WF_CONNECTING;
   strcpy(softAP_SSID, "");
+  tMillis = millis();
 
-  digitalWrite(BOARD_LED_PIN, LOW);
-  
-  if (strlen(configuration.wifiSsid)) {
+  if (strlen(SSID)) {
 
     // Join AP from Config
     Serial.print("Connecting to WiFi ");
-    Serial.println(configuration.wifiSsid);
-    WiFi.begin(configuration.wifiSsid, configuration.wifiPassword);
+    Serial.println(SSID);
+    WiFi.begin(SSID, configuration.wifiPassword);
     
   } else {
 
@@ -157,7 +159,6 @@ void CWifiManager::connect() {
 
 void CWifiManager::listen() {
 
-  digitalWrite(BOARD_LED_PIN, HIGH);
   status = WF_LISTENING;
 
   // Web
@@ -174,14 +175,41 @@ void CWifiManager::listen() {
 
 void CWifiManager::loop() {
   if (WiFi.status() == WL_CONNECTED || WiFi.status() == WL_NO_SHIELD) {
-    if (status != WF_LISTENING) {
-      listen();
-    } else {
+    // WiFi is connected
+
+    if (status == WF_LISTENING) {  
+      // Handle requests
       server.handleClient();
+    } else {
+      // Start listening for requests
+      listen();
     }
+
   } else {
-    server.close();
-    status = WF_CONNECTING;
+    // WiFi is down
+
+    switch (status) {
+      case WF_LISTENING: {
+        Serial.println("Disconnecting");
+        server.close();
+        client.disconnect();
+        status = WF_CONNECTING;
+        connect();
+      } break;
+      case WF_CONNECTING: {
+        if (millis() - tMillis > MAX_CONNECT_TIMEOUT_MS) {
+          Serial.println("Connecting failed, create an AP instead");
+          esp_wifi_stop();
+
+          tMillis = millis();
+          strcpy(SSID, "");
+
+          connect();
+        }
+      } break;
+
+    }
+
   }
   
 }

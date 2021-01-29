@@ -17,6 +17,7 @@ private:
     unsigned long tMillis;
     wifi_status status;
     char softAP_SSID[32];
+    char SSID[32];
 
     WebServer server;
     PubSubClient client;

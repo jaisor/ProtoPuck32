@@ -5,6 +5,30 @@
 CInternalLEDManager::CInternalLEDManager(uint16_t size, float brightness)
 : CLEDManager(size, brightness) {
     brightnessChange = 0;
+
+    changePalette = 0;
+
+    CRGB purple = CHSV( HUE_PURPLE, 255, 255);
+    CRGB green  = CHSV( HUE_GREEN, 255, 255);
+    CRGB black  = CRGB::Black;
+
+    palettes.push_back(
+        CRGBPalette16(
+            green,  green,  black,  black,
+            purple, purple, black,  black,
+            green,  green,  black,  black,
+            purple, purple, black,  black )
+    );
+
+    palettes.push_back(RainbowColors_p);
+    palettes.push_back(RainbowStripeColors_p);
+    palettes.push_back(RainbowStripeColors_p);
+    palettes.push_back(CloudColors_p);
+    palettes.push_back(PartyColors_p);
+    palettes.push_back(LavaColors_p);
+    palettes.push_back(OceanColors_p);
+    palettes.push_back(ForestColors_p);
+    palettes.push_back(HeatColors_p);
 }
 
 #ifdef LED
@@ -14,7 +38,7 @@ uint16_t CInternalLEDManager::LED_Status(CRGB *leds) {
     uint8_t b = brightness * brightness * 255;
     
     for( int i = 0; i < size; i++) {
-        leds[i] = ColorFromPalette( LavaColors_p, colorIndex, b, LINEARBLEND);
+        leds[i] = ColorFromPalette( palettes[currentPaletteIndex], colorIndex, b, LINEARBLEND);
         colorIndex += 1;
     }
 
@@ -58,6 +82,15 @@ void CInternalLEDManager::loop() {
         brightnessChange = 0;
         configuration.ledBrightness = brightness;
     }
+
+    if (millis() - tMillsChangePalette > 500) {
+        tMillsChangePalette = millis();
+        currentPaletteIndex += changePalette;
+        if (currentPaletteIndex >= palettes.size()) {
+            currentPaletteIndex = 0;
+        }
+        changePalette = 0;
+    }
 }
 
 #ifdef KEYPAD
@@ -66,6 +99,8 @@ void CInternalLEDManager::keyEvent(key_status_t key) {
     switch (key) {
         case KEY_UP: brightnessChange = 0.001; break;
         case KEY_DOWN: brightnessChange = -0.001; break;
+        case KEY_LEFT: changePalette = 1; break;
+        case KEY_RIGHT: changePalette = -1; break;
         default: brightnessChange = 0;
     }
 
