@@ -9,7 +9,7 @@
 #include "WifiManager.h"
 #include "Configuration.h"
 
-#define MAX_CONNECT_TIMEOUT_MS 4000 // 10 seconds to connect before creating its own AP
+#define MAX_CONNECT_TIMEOUT_MS 10000 // 10 seconds to connect before creating its own AP
 #define BOARD_LED_PIN 2
 
 const int RSSI_MAX =-50;// define maximum straighten of signal in dBm
@@ -77,7 +77,6 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
   wifi_mode_t espm;
   esp_wifi_get_mode(&espm);
 
-  //Serial.print("Status:"); Serial.println(String(s));
   if (s == WL_CONNECTED || espm == WIFI_MODE_AP || espm == WIFI_MODE_APSTA) {
 
     digitalWrite(BOARD_LED_PIN, status == WF_LISTENING ? HIGH : LOW);
@@ -116,7 +115,6 @@ uint16_t CWifiManager::OLED_Status(Adafruit_GFX *oled) {
     digitalWrite(BOARD_LED_PIN, dt % 100 ? LOW : HIGH);
   }  else {
     digitalWrite(BOARD_LED_PIN, LOW);
-    Serial.print("Status:"); Serial.println(String(s));
   }
   
   //
@@ -134,8 +132,7 @@ void CWifiManager::connect() {
   if (strlen(SSID)) {
 
     // Join AP from Config
-    Serial.print("Connecting to WiFi ");
-    Serial.println(SSID);
+    log_d("Connecting to WiFi: '%s'", SSID);
     WiFi.begin(SSID, configuration.wifiPassword);
     
   } else {
@@ -146,13 +143,12 @@ void CWifiManager::connect() {
       chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
     }
 
-    Serial.print("Chip ID: "); Serial.println(chipId);
+    log_d("Chip ID: '%i'", chipId);
 
     sprintf_P(softAP_SSID, "%s_%i", WIFI_FALLBACK_SSID, chipId);
-
-    Serial.print("Creating WiFi "); Serial.println(softAP_SSID);
+    log_d("Creating WiFi: '%s'", softAP_SSID);
+    
     WiFi.softAP(softAP_SSID, WIFI_FALLBACK_PASS);
-
   }
   
 }
@@ -165,8 +161,8 @@ void CWifiManager::listen() {
   server.on("/", std::bind(&CWifiManager::handleRoot, this));
   server.on("/connect", HTTP_POST, std::bind(&CWifiManager::handleConnect, this));
   server.begin(WEB_SERVER_PORT);
-  Serial.print("Web server listening on port "); Serial.println(WEB_SERVER_PORT);
-
+  log_d("Web server listening on port %i", WEB_SERVER_PORT);
+  
   // MQTT
   client.setServer("192.168.10.10", 1883);
   client.setCallback(handle_mqtt_message);
@@ -190,7 +186,7 @@ void CWifiManager::loop() {
 
     switch (status) {
       case WF_LISTENING: {
-        Serial.println("Disconnecting");
+        log_d("Disconnecting");
         server.close();
         client.disconnect();
         status = WF_CONNECTING;
@@ -198,7 +194,7 @@ void CWifiManager::loop() {
       } break;
       case WF_CONNECTING: {
         if (millis() - tMillis > MAX_CONNECT_TIMEOUT_MS) {
-          Serial.println("Connecting failed, create an AP instead");
+          log_d("Connecting failed, create an AP instead");
           esp_wifi_stop();
 
           tMillis = millis();
@@ -234,11 +230,11 @@ void CWifiManager::handleRoot() {
   <body>\
     <h1>ProtoPuck32</h1>\
     <p>Connect to WiFi Access Point (AP)</p>\
-    <form method='POST' action='/connect'>\
+    <form method='POST' action='/connect' enctype='application/x-www-form-urlencoded'>\
       <label for='ssid'>SSID (AP Name):</label><br>\
       <input type='text' id='ssid' name='ssid'><br><br>\
       <label for='pass'>Password (WPA2):</label><br>\
-      <input type='password' id='pass' name='pass' minlength='8' required><br><br>\
+      <input type='password' id='pass' name='pass' minlength='8' autocomplete='off' required><br><br>\
       <input type='submit' value='Connect...'>\
     </form>\
     <br><br><hr>\
@@ -256,6 +252,10 @@ void CWifiManager::handleRoot() {
 
 void CWifiManager::handleConnect() {
   digitalWrite(BOARD_LED_PIN, LOW);
+
+  //String postBody = server.arg("plain");
+  String ssid = server.arg("ssid");
+  String password = server.arg("password");
   
   char temp[1000];
   int sec = millis() / 1000;
@@ -273,14 +273,25 @@ void CWifiManager::handleConnect() {
   </head>\
   <body>\
     <h1>ProtoPuck32</h1>\
-    <p>Connecting...</p>\
+    <p>Connecting to '%s' ... see you on the other side!</p>\
     <p>Uptime: %02d:%02d:%02d</p>\
   </body>\
 </html>",
+    ssid,
+    hr, min % 60, sec % 60
+  );
 
-           hr, min % 60, sec % 60
-          );
   server.send(200, "text/html", temp);
+
+  ssid.toCharArray(configuration.wifiSsid, sizeof(configuration.wifiSsid));
+  password.toCharArray(configuration.wifiPassword, sizeof(configuration.wifiPassword));
+
+  log_i("Saved config SSID: '%s'", configuration.wifiSsid);
+
+  EEPROM_saveConfig();
+
+  strcpy(SSID, configuration.wifiSsid);
+  connect();
 
   digitalWrite(BOARD_LED_PIN, HIGH);
   

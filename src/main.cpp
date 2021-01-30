@@ -43,7 +43,7 @@ CBaseManager *managers[4];
 
 unsigned long tMillis;
 
-int tempInC = EEPROM.read(0);
+int tempInC = 0; //EEPROM.read(0);
 float p = 0;
 
 void setup() {
@@ -55,19 +55,20 @@ void setup() {
   //strcpy(configuration.wifiPassword, "<REDACTED>");
   //EEPROM_saveConfig();
 
-
 #ifdef OLED
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println(F("SSD1306 allocation failed"));
+    log_e("SSD1306 OLED initialiation failed");
     for(;;);
   }
 #endif
-  
+
+#ifdef TEMP_SENSOR
   bool status = bme.begin(0x76);  
   if (!status) {
-    Serial.println("Could not find a valid BME280 sensor, check wiring!");
+    log_e("BME280 sensor initialiation failed");
     while (1);
   }
+#endif
   
   delay(100);
 
@@ -132,7 +133,7 @@ void loop() {
     //
 
     // display temperature
-  #ifdef OLED
+#ifdef OLED
     
     display.setCursor(0,16);
     display.print("Temperature: ");
@@ -142,9 +143,10 @@ void loop() {
 
     if (digitalRead(BOOT_BUTTON) == LOW) {
       tempInC = !tempInC;
-      EEPROM.write(0, tempInC);
+      //EEPROM.write(0, tempInC);
     }
 
+#ifdef TEMP_SENSOR
     int temp = bme.readTemperature();
 
     display.print(String(tempInC ? temp : (temp*9/5)+32 ));
@@ -163,13 +165,14 @@ void loop() {
     display.setCursor(0, 48);
     display.print(String(bme.readHumidity(), 1));
     display.print("%"); 
+#endif
 
     display.display();
-  #endif
+#endif
 
-  #ifdef LED
+#ifdef LED
     FastLED.show();
-  #endif
+#endif
   }  
 
   // Post presentation

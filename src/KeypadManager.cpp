@@ -64,15 +64,18 @@ void CKeypadManager::addKeyListener(TKeyListener listener) {
     if (!this->listener) {
         
         this->listener = l;
-        Serial.println("Listener added to root ");
+        log_d("Added first keypad listener");
     } else {
+        uint8_t i = 0;
         listener_t *cur = this->listener;
         while(cur) {
             if (!cur->next) {
+                log_d("Added keypad listener number %i", i);
                 cur->next = l;
                 return;
             }
             cur = cur->next;
+            i++;
         }
     }
    

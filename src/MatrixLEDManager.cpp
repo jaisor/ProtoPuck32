@@ -10,11 +10,8 @@ static float vyf = 0;
 CMatrixLEDManager::CMatrixLEDManager(CRGB *leds, uint16_t size, uint8_t width, uint8_t height, float brightness)
 : CLEDManager(size, brightness) {
 
-    Serial.print("xf: ");Serial.println(xf);
-    Serial.print("yf: ");Serial.println(yf);
-
-    Serial.print("vxf: ");Serial.println(vxf);
-    Serial.print("vyf: ");Serial.println(vyf);
+    log_d("Position (%0.1f, %0.1f)", xf, yf);
+    log_d("Velocity (%0.1f, %0.1f)", vxf, vyf);
 
     this->leds = leds;
     this->width = width;
@@ -62,8 +59,6 @@ void CMatrixLEDManager::loop() {
         byte startHue8 = tMillis / 65536;
         int8_t yHueDelta8 = yHueDelta32 / 32768;
         int8_t xHueDelta8 = xHueDelta32 / 32768;
-
-        //Serial.print(brightness * 255);Serial.print(" - ");Serial.println(brightness);
 
         byte lineStartHue = startHue8;
         for( byte y = 0; y < height; y++) {

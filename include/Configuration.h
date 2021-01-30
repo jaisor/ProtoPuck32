@@ -10,7 +10,7 @@
 #define KEYPAD      // Buttons
 
 #define BOOT_BUTTON 0
-#define EEPROM_CONFIGURATION_START 10    // First EEPROM byte to be used for storing the configuration
+#define EEPROM_CONFIGURATION_START 0    // First EEPROM byte to be used for storing the configuration
 
 #ifdef WIFI
     #define WIFI_SSID "ProtoPuck32"
