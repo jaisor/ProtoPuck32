@@ -234,7 +234,7 @@ void CWifiManager::handleRoot() {
       <label for='ssid'>SSID (AP Name):</label><br>\
       <input type='text' id='ssid' name='ssid'><br><br>\
       <label for='pass'>Password (WPA2):</label><br>\
-      <input type='password' id='pass' name='pass' minlength='8' autocomplete='off' required><br><br>\
+      <input type='password' id='pass' name='password' minlength='8' autocomplete='off' required><br><br>\
       <input type='submit' value='Connect...'>\
     </form>\
     <br><br><hr>\

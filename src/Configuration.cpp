@@ -16,14 +16,10 @@ void EEPROM_loadConfig() {
   EEPROM.begin(sizeof(configuration_t));
   EEPROM.get(EEPROM_CONFIGURATION_START, configuration);
 
-  log_i("SSID: '%s'", configuration.wifiSsid);
-  log_i("loaded: '%i'", configuration._loaded);
-
   if (!configuration._loaded) {
-    configuration._loaded = true;
-    log_i("loaded: '%i'", configuration._loaded);
     // blank
     log_i("Blank configuration, loading defaluts");
+    configuration._loaded = true;
     #ifdef LED
       configuration.ledBrightness = LED_BRIGHTNESS;
     #endif
