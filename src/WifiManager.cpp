@@ -8,6 +8,7 @@
 
 #include "WifiManager.h"
 #include "Configuration.h"
+#include "MatrixLEDManager.h"
 
 #define MAX_CONNECT_TIMEOUT_MS 10000 // 10 seconds to connect before creating its own AP
 #define BOARD_LED_PIN 2
@@ -160,6 +161,7 @@ void CWifiManager::listen() {
   // Web
   server.on("/", std::bind(&CWifiManager::handleRoot, this));
   server.on("/connect", HTTP_POST, std::bind(&CWifiManager::handleConnect, this));
+  server.on("/led/external/matrix", HTTP_POST, std::bind(&CWifiManager::handleLEDMatrix, this));
   server.begin(WEB_SERVER_PORT);
   log_d("Web server listening on port %i", WEB_SERVER_PORT);
   
@@ -253,7 +255,6 @@ void CWifiManager::handleRoot() {
 void CWifiManager::handleConnect() {
   digitalWrite(BOARD_LED_PIN, LOW);
 
-  //String postBody = server.arg("plain");
   String ssid = server.arg("ssid");
   String password = server.arg("password");
   
@@ -296,3 +297,37 @@ void CWifiManager::handleConnect() {
   digitalWrite(BOARD_LED_PIN, HIGH);
   
 }
+
+#ifdef LED_EXTERNAL
+/*
+  Post body should contain comma delimited items in a list like this: X Y RRGGBB,X Y RRGGBB
+  Each item is a space delimited X,Y coordinates of the LED pixel in the matrix and the expected color in Hex
+  Ex: 0 0 ffbbdd,1 0 c91232
+*/
+void CWifiManager::handleLEDMatrix() {
+  digitalWrite(BOARD_LED_PIN, LOW);
+
+  matrix_pixel_t pixels[LED_EXTERNAL_MATRIX_WIDTH * LED_EXTERNAL_MATRIX_HEIGHT];
+
+  String postBody = server.arg("plain");
+  log_d("LED Matrinx: %s", postBody.c_str());
+
+/*
+  const char pixelDelimiter[1] = ",";
+  const char *raw = postBody.c_str();
+  char *pixelToken = strtok(raw, pixelDelimiter);
+
+  while( pixelToken != NULL ) {
+    log_d("P: '%s'", pixelToken);
+    pixelToken = strtok(NULL, pixelDelimiter);
+  }
+*/
+  
+  //postBody.indexOf()
+  
+
+  
+  server.send(200, "text/html", "OK");
+  digitalWrite(BOARD_LED_PIN, HIGH);
+}
+#endif

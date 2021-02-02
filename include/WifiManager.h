@@ -27,6 +27,9 @@ private:
 
     void handleRoot();
     void handleConnect();
+#ifdef LED_EXTERNAL
+    void handleLEDMatrix();
+#endif
     
 public:
 	CWifiManager();

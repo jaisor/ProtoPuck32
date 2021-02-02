@@ -20,11 +20,11 @@ CKeypadManager::CKeypadManager() {
 uint16_t CKeypadManager::OLED_Status(Adafruit_GFX *oled) {
 
     oled->setTextSize(1);
-    oled->setCursor(80, 24);
-    oled->print("K: ");
+    oled->setCursor(70, 24);
+    oled->print("K:");
     oled->print(String(analogRead(KEYPAD_PIN)));
 
-    oled->drawBitmap(80, 36, key_bitmaps[keyStatus], 8, 8, 1);
+    oled->drawBitmap(116, 24, key_bitmaps[keyStatus], 8, 8, 1);
 
     return 100;
 }

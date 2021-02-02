@@ -5,7 +5,6 @@
 CInternalLEDManager::CInternalLEDManager(uint16_t size, float brightness)
 : CLEDManager(size, brightness) {
     brightnessChange = 0;
-
     changePalette = 0;
 
     CRGB purple = CHSV( HUE_PURPLE, 255, 255);
@@ -60,6 +59,9 @@ uint16_t CInternalLEDManager::OLED_Status(Adafruit_GFX *oled) {
         oled->print(String((uint8_t)(brightness * 100)));
         oled->print("%");
         oled->setTextColor(1);
+
+        oled->setCursor(70, 37);
+        oled->print("Brightness:");
     }
     
     return 100;
@@ -97,8 +99,8 @@ void CInternalLEDManager::loop() {
 void CInternalLEDManager::keyEvent(key_status_t key) {
 
     switch (key) {
-        case KEY_UP: brightnessChange = 0.001; break;
-        case KEY_DOWN: brightnessChange = -0.001; break;
+        case KEY_UP: brightnessChange = 0.005; break;
+        case KEY_DOWN: brightnessChange = -0.005; break;
         case KEY_LEFT: changePalette = 1; break;
         case KEY_RIGHT: changePalette = -1; break;
         default: brightnessChange = 0;

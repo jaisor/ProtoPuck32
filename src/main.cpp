@@ -79,7 +79,9 @@ void setup() {
 
 #ifdef LED
   FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(ledsInternal, LED_STRIP_SIZE).setCorrection( TypicalLEDStrip );
-  FastLED.addLeds<LED_EXTERNAL_TYPE, LED_EXTERNAL_PIN, LED_COLOR_ORDER>(ledsExternal, LED_EXTERNAL_STRIP_SIZE).setCorrection( TypicalLEDStrip );
+#ifdef LED_EXTERNAL
+  FastLED.addLeds<LED_EXTERNAL_TYPE, LED_EXTERNAL_PIN, LED_EXTERNAL_COLOR_ORDER>(ledsExternal, LED_EXTERNAL_STRIP_SIZE).setCorrection( TypicalLEDStrip );
+#endif
 #endif
 
   uint8_t mgrIndex = 0;

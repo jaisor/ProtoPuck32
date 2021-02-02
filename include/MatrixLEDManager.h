@@ -6,6 +6,11 @@
 #ifdef LED_EXTERNAL
 #include <FastLED.h>
 
+struct matrix_pixel_t {
+    uint8_t x,y;
+    uint32_t color;
+};
+
 class CMatrixLEDManager: public CLEDManager {
 
 private:

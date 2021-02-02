@@ -52,6 +52,28 @@ void CMatrixLEDManager::loop() {
         //startIndex = startIndex + 1;
 
         FastLED.clear();
+
+        /*
+        static uint8_t r, g, b = 0;
+        //memset(leds, 10, 3*width*height);
+        for (uint16_t i=0; i<LED_EXTERNAL_STRIP_SIZE; i++) {
+            //leds[i] = CRGB(r, g, b);
+            leds[i] = CRGB(10, 0, 0);
+        }
+        
+        r++;
+        if (r>=255) {
+            r=0;
+            g++;
+            if (g>=255) {
+                g=0;
+                b++;
+                if (b>=255) {
+                    b=0;
+                }
+            }
+        }
+        */
         
         int32_t yHueDelta32 = ((int32_t)cos16( tMillis * (27/1) ) * (350 / width));
         int32_t xHueDelta32 = ((int32_t)cos16( tMillis * (39/1) ) * (310 / height));
@@ -69,8 +91,7 @@ void CMatrixLEDManager::loop() {
                 leds[ XY(x, y) ]  = CHSV( pixelHue, 255, configuration.ledBrightness * 255);
             }
         }
-        
-
+ 
         if (vxf == 0 ) { vxf = (rand() % 1000 - 500) / 100000.0f; }
         if (vyf == 0 ) { vyf = (rand() % 1000 - 500) / 100000.0f; }
 

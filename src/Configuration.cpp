@@ -24,6 +24,24 @@ void EEPROM_loadConfig() {
       configuration.ledBrightness = LED_BRIGHTNESS;
     #endif
   }
+
+#ifdef LED
+  if (isnan(configuration.ledBrightness)) {
+    log_v("NaN brightness");
+    configuration.ledBrightness = LED_BRIGHTNESS;
+  }
+#endif
+
+#ifdef WIFI
+  String wifiStr = String(configuration.wifiSsid);
+  for (auto i : wifiStr) {
+    if (!isAscii(i)) {
+      log_v("Bad SSID, loading default", wifiStr);
+      strcpy(configuration.wifiSsid, "");
+      break;
+    }
+  }
+#endif
 }
 
 void EEPROM_wipe() {
