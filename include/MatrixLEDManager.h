@@ -1,9 +1,10 @@
-#ifndef _DEMO_LED_MANAGER_H
-#define _DEMO_LED_MANAGER_H
+#ifndef _MATRIX_LED_MANAGER_H
+#define _MATRIX_LED_MANAGER_H
 
 #include "LEDManager.h"
 
-#ifdef LED_EXTERNAL
+#ifdef LED_EXTERNAL_MATRIX
+#include "matrix/BaseMatrixMode.h"
 #include <FastLED.h>
 
 struct matrix_pixel_t {
@@ -14,24 +15,19 @@ struct matrix_pixel_t {
 class CMatrixLEDManager: public CLEDManager {
 
 private:
-    unsigned long tMillis, tMillsChangePalette;
+    unsigned long tMillis, tMillsChangeMode;
     uint8_t startIndex = 0;
 
-LED_EXTERNAL
     CRGB *leds;
 
     uint8_t width, height;
 
-    std::vector<CRGBPalette16> palettes;
-    uint8_t currentPaletteIndex;
-    uint8_t changePalette;
-
-    void FillLEDsFromPaletteColors(CRGB *leds, uint8_t colorIndex);
-    uint16_t XY( uint8_t x, uint8_t y);
-    uint16_t XYsafe( uint8_t x, uint8_t y);
+    std::vector<CBaseMatrixMode*> modes;
+    uint8_t currentModeIndex;
+    uint8_t changeMode;
 
 public:
-	CMatrixLEDManager(CRGB *leds, uint16_t size, uint8_t width, uint8_t height, float brightness);
+	CMatrixLEDManager(CRGB *leds, uint8_t width, uint8_t height, float brightness);
 
 #ifdef OLED
     virtual uint16_t OLED_Status(Adafruit_GFX *oled);

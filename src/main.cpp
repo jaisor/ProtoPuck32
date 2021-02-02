@@ -93,7 +93,7 @@ void setup() {
 #ifdef LED
   managers[mgrIndex++] = new CInternalLEDManager(LED_STRIP_SIZE, configuration.ledBrightness);
   #ifdef LED_EXTERNAL_MATRIX
-    managers[mgrIndex++] = new CMatrixLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_MATRIX_WIDTH, LED_EXTERNAL_MATRIX_HEIGHT, LED_EXTERNAL_BRIGHTNESS); 
+    managers[mgrIndex++] = new CMatrixLEDManager(ledsExternal, LED_EXTERNAL_MATRIX_WIDTH, LED_EXTERNAL_MATRIX_HEIGHT, LED_EXTERNAL_BRIGHTNESS); 
   #else
     managers[mgrIndex++] = new CDemoLEDManager(ledsExternal, LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS); 
   #endif
