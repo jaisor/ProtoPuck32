@@ -33,6 +33,22 @@ uint16_t CKeypadManager::OLED_Status(Adafruit_GFX *oled) {
 void CKeypadManager::loop() {
 
     uint16_t k = analogRead(KEYPAD_PIN);
+
+#ifdef ALEX_GIFT
+    if (k > 4000) {
+        keyStatus = KEY_NONE;
+    } else if (k > 2300 && k < 2500) {
+        keyStatus = KEY_RIGHT;
+    } else if (k < 300) {
+        keyStatus = KEY_LEFT;
+    } else if (k > 2600 && k < 3000) {
+        keyStatus = KEY_UP;
+    } else if (k > 1000 && k < 1600) {
+        keyStatus = KEY_DOWN;
+    } else if (k > 3200 && k < 3400) {
+        keyStatus = KEY_MIDDLE;
+    }
+#else
     if (k > 4000) {
         keyStatus = KEY_NONE;
     } else if (k > 2300 && k < 2500) {
@@ -45,7 +61,8 @@ void CKeypadManager::loop() {
         keyStatus = KEY_UP;
     } else if (k > 3200 && k < 3400) {
         keyStatus = KEY_MIDDLE;
-    } 
+    }
+#endif 
 
     if (keyStatus != KEY_NONE) {
         listener_t *cur = this->listener;
