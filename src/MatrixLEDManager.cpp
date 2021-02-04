@@ -4,6 +4,8 @@
 #include "matrix/MatrixModeMovingSquare.h"
 #include "matrix/MatrixModePicture.h"
 
+#include "matrix/bitmaps.h"
+
 CMatrixLEDManager::CMatrixLEDManager(CRGB *leds, uint8_t width, uint8_t height, float brightness)
 : CLEDManager(width * height, brightness) {
 
@@ -13,9 +15,10 @@ CMatrixLEDManager::CMatrixLEDManager(CRGB *leds, uint8_t width, uint8_t height, 
 
     tMillis = tMillsChangeMode = millis();
 
-    modes.push_back(new CMatrixModePicture(width, height));
+    modes.push_back(new CMatrixModePicture(width, height, BITMAP_BDAY, BITMAPS_BDAY));
     modes.push_back(new CMatrixModeRGBDemo(width, height));
     modes.push_back(new CMatrixModeMovingSquare(width, height));
+    modes.push_back(new CMatrixModePicture(width, height, BITMAP_MINECRAFT, BITMAPS_MINECRAFT));
 
     currentModeIndex = 0;
 }
@@ -24,15 +27,15 @@ void CMatrixLEDManager::loop() {
     if (changeMode && millis() - tMillsChangeMode > 1000) {
         tMillsChangeMode = millis();
         currentModeIndex += changeMode;
+        if (currentModeIndex < 0 ) {
+            currentModeIndex = modes.size()-1;
+        }
         if (currentModeIndex >= modes.size()) {
             currentModeIndex = 0;
         }
-        if (currentModeIndex < 0 ) {
-            currentModeIndex = modes.size() - 1;
-        }
-        changeMode = 0;
         log_d("Change mode %i changed index to %i", changeMode, currentModeIndex);
     }
+    changeMode = 0;
 
     modes[currentModeIndex]->draw(leds);
 }
@@ -42,7 +45,7 @@ void CMatrixLEDManager::keyEvent(key_status_t key) {
     switch (key) {
         case KEY_LEFT: changeMode = 1; break;
         case KEY_RIGHT: changeMode = -1; break;
-        default: ;
+        default: changeMode = 0;
     }
 
     modes[currentModeIndex]->keyEvent(key);

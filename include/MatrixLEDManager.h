@@ -23,8 +23,8 @@ private:
     uint8_t width, height;
 
     std::vector<CBaseMatrixMode*> modes;
-    uint8_t currentModeIndex;
-    uint8_t changeMode;
+    int8_t currentModeIndex;
+    int8_t changeMode;
 
 public:
 	CMatrixLEDManager(CRGB *leds, uint8_t width, uint8_t height, float brightness);

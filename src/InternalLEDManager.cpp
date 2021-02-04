@@ -95,8 +95,8 @@ void CInternalLEDManager::loop() {
         if (currentPaletteIndex >= palettes.size()) {
             currentPaletteIndex = 0;
         }
-        changePalette = 0;
-    }
+    } 
+    changePalette = 0;
 }
 
 #ifdef KEYPAD
