@@ -6,7 +6,7 @@
 #ifdef LED_EXTERNAL_MATRIX
 
 #define BITMAPS_BDAY 5
-#define BITMAPS_MINECRAFT 5
+#define BITMAPS_MINECRAFT 6
 
 uint8_t BITMAP_BDAY[] = {
     // Cake
