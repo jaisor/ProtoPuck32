@@ -81,8 +81,12 @@ void CInternalLEDManager::loop() {
             brightness = 1;
         }
 
-        brightnessChange = 0;
-        configuration.ledBrightness = brightness;
+        if (brightnessChange) {
+            brightnessChange = 0;
+            configuration.ledBrightness = brightness;
+            EEPROM_saveConfig(); // Should not save so frequently to preserve the flash
+        }
+
     }
 
     if (millis() - tMillsChangePalette > 500) {
@@ -91,8 +95,8 @@ void CInternalLEDManager::loop() {
         if (currentPaletteIndex >= palettes.size()) {
             currentPaletteIndex = 0;
         }
-        changePalette = 0;
-    }
+    } 
+    changePalette = 0;
 }
 
 #ifdef KEYPAD

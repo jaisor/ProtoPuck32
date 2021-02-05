@@ -27,6 +27,7 @@ public:
 private:
     unsigned long tMillis;
     key_status_t keyStatus; 
+    uint16_t keyEventCounter[NUM_KEYS];
 
     listener_t *listener; // Linked list of TKeyListener nodes
 };

@@ -9,6 +9,8 @@
 #define TEMP_SENSOR // Temperature, humidity, pressure
 #define KEYPAD      // Buttons
 
+//#define ALEX_GIFT   // Temp, since the keyboard is flipped. TODO: implement key mapping sequence.
+
 #define BOOT_BUTTON 0
 #define EEPROM_CONFIGURATION_START 0    // First EEPROM byte to be used for storing the configuration
 
