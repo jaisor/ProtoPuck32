@@ -38,8 +38,11 @@ Schematic:
 
 Case - 3D printed, STL files:
 
-* [LED Diffuser](case/LED_Matrix/LEDMatrix-Diffuser.stl)
-* [LED Frame](case/LED_Matrix/LEDMatrix-FrameSide.stl)
+* [LED diffuser](case/LED_Matrix/LEDMatrix-Diffuser.stl)
+* [LED frame](case/LED_Matrix/LEDMatrix-FrameSide.stl)
+* [LED frame back brace](case/LED_Matrix/LEDMatrix-FrameBackBrace.stl)
+* [Base](case/LED_Matrix/LEDMatrix-FrameBase.stl)
+* [Base lid](case/LED_Matrix/LEDMatrix-FrameBaseLid.stl)
 
 ---
 
