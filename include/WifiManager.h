@@ -5,6 +5,7 @@
 #include <WebServer.h>
 #include <PubSubClient.h>
 #include "BaseManager.h"
+#include "matrix/MatrixModeIoT.h"
 
 typedef enum {
     WF_CONNECTING = 0,
@@ -21,13 +22,14 @@ private:
 
     WebServer server;
     PubSubClient client;
+    CMatrixModeIoT *ioTManager;
 
     void connect();
     void listen();
 
     void handleRoot();
     void handleConnect();
-#ifdef LED_EXTERNAL
+#ifdef LED_EXTERNAL_MATRIX
     void handleLEDMatrix();
 #endif
     
@@ -37,6 +39,8 @@ public:
     virtual uint16_t OLED_Status(Adafruit_GFX *oled);
 #endif
     virtual void loop();
+
+    void setIoTManager(CMatrixModeIoT *ioTManager);
 
 };
 
