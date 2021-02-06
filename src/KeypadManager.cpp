@@ -68,7 +68,7 @@ void CKeypadManager::loop() {
             keyStatus = KEY_RIGHT;
         } else if (k > 2600 && k < 3000) {
             keyStatus = KEY_DOWN;
-        } else if (k > 1000 && k < 1600) {
+        } else if (k > 1000 && k < 1700) {
             keyStatus = KEY_UP;
         } else if (k > 3200 && k < 3400) {
             keyStatus = KEY_MIDDLE;
