@@ -8,7 +8,6 @@
 
 #include "WifiManager.h"
 #include "Configuration.h"
-#include "MatrixLEDManager.h"
 
 #define MAX_CONNECT_TIMEOUT_MS 10000 // 10 seconds to connect before creating its own AP
 #define BOARD_LED_PIN 2
@@ -298,7 +297,7 @@ void CWifiManager::handleConnect() {
   
 }
 
-#ifdef LED_EXTERNAL
+#ifdef LED_EXTERNAL_MATRIX
 /*
   Post body should contain comma delimited items in a list like this: X Y RRGGBB,X Y RRGGBB
   Each item is a space delimited X,Y coordinates of the LED pixel in the matrix and the expected color in Hex
@@ -311,6 +310,8 @@ void CWifiManager::handleLEDMatrix() {
 
   String postBody = server.arg("plain");
   log_d("LED Matrinx: %s", postBody.c_str());
+
+  ioTManager->setLeds(pixels);
 
 /*
   const char pixelDelimiter[1] = ",";
