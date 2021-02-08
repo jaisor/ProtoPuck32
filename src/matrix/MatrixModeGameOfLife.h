@@ -10,7 +10,15 @@ class CMatrixModeGameOfLife : public CBaseMatrixMode {
 
 private:
     CRGB *current;
+    CRGB *next;
+    CRGB live;
+    CRGB dead;
+
+    uint8_t populationDensity;
+
     void randomize();
+    uint8_t howManyNeighbors(uint8_t x, uint8_t y);
+    bool isAlive(uint8_t x, uint8_t y);
 
 public:
 	CMatrixModeGameOfLife(uint8_t width, uint8_t height);
