@@ -9,6 +9,7 @@
 class CMatrixModeGameOfLife : public CBaseMatrixMode {
 
 private:
+    CRGB *previous;
     CRGB *current;
     CRGB *next;
     CRGB live;

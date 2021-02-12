@@ -6,9 +6,10 @@ CMatrixModeGameOfLife::CMatrixModeGameOfLife(uint8_t width, uint8_t height)
 
     current = new CRGB[width*height];
     next = new CRGB[width*height];
+    previous = new CRGB[width*height];
 
-    live = CRGB(50, 255, 100);
-    dead = CRGB(255, 50, 150);
+    live = CRGB(255, 255, 255);
+    dead = CRGB(0, 0, 0);
     populationDensity = 10; // percent of initially alive cells
 
     randomize();
@@ -43,8 +44,15 @@ void CMatrixModeGameOfLife::draw(CRGB *leds) {
             }
         }
         
-        // copy
-        memcpy(current, next, width * height * sizeof(CRGB));
+        // stuck?
+        if (memcmp(current, next, width * height * sizeof(CRGB)) == 0 
+            || memcmp(previous, next, width * height * sizeof(CRGB)) == 0) {
+            randomize();
+        } else {
+            // copy
+            memcpy(previous, current, width * height * sizeof(CRGB));
+            memcpy(current, next, width * height * sizeof(CRGB));
+        }
 
         // display the leds
         for (uint8_t x=0; x<width; x++) {
