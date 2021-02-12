@@ -3,6 +3,7 @@
 #include "matrix/MatrixModeRGBDemo.h"
 #include "matrix/MatrixModeMovingSquare.h"
 #include "matrix/MatrixModePicture.h"
+#include "matrix/MatrixModeGameOfLife.h"
 
 #include "matrix/bitmaps.h"
 
@@ -15,10 +16,12 @@ CMatrixLEDManager::CMatrixLEDManager(CRGB *leds, uint8_t width, uint8_t height, 
 
     tMillis = tMillsChangeMode = millis();
 
+    modes.push_back(new CMatrixModeGameOfLife(width, height));
     modes.push_back(new CMatrixModePicture(width, height, BITMAP_BDAY, BITMAPS_BDAY));
     modes.push_back(new CMatrixModeRGBDemo(width, height));
     modes.push_back(new CMatrixModeMovingSquare(width, height));
     modes.push_back(new CMatrixModePicture(width, height, BITMAP_MINECRAFT, BITMAPS_MINECRAFT));
+    
 
     currentModeIndex = 0;
 }
