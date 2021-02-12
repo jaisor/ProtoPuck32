@@ -29,6 +29,9 @@ private:
 
     void handleRoot();
     void handleConnect();
+
+    String getTempSensorResponse();
+    
 #ifdef LED_EXTERNAL_MATRIX
     void handleLEDMatrix();
 #endif

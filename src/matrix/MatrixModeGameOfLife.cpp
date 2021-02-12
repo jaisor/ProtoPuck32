@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include "MatrixModeGameOfLife.h"
 
-CMatrixModeGameOfLife::CMatrixModeGameOfLife(uint8_t width, uint8_t height)
-: CBaseMatrixMode(width, height) {
+CMatrixModeGameOfLife::CMatrixModeGameOfLife(const uint8_t width, const uint8_t height)
+: CBaseMatrixMode(width, height), size(width * height) {
 
-    current = new CRGB[width*height];
-    next = new CRGB[width*height];
-    previous = new CRGB[width*height];
+    current = new uint8_t[size];
+    next = new uint8_t[size];
+    previous = new uint8_t[size];
 
     live = CRGB(255, 255, 255);
     dead = CRGB(0, 0, 0);
@@ -29,15 +29,15 @@ void CMatrixModeGameOfLife::draw(CRGB *leds) {
 
                 if (isAlive(x, y)) {
                     if (n<2 || n>3) {
-                        next[i] = dead;
+                        next[i] = 0;
                     } else {
-                        next[i] = live;
+                        next[i] = 1;
                     }
                 } else {
                     if (n == 3) {
-                        next[i] = live;
+                        next[i] = 1;
                     } else {
-                        next[i] = dead;
+                        next[i] = 0;
                     }
                 }
 
@@ -45,22 +45,21 @@ void CMatrixModeGameOfLife::draw(CRGB *leds) {
         }
         
         // stuck?
-        if (memcmp(current, next, width * height * sizeof(CRGB)) == 0 
-            || memcmp(previous, next, width * height * sizeof(CRGB)) == 0) {
+        if (memcmp(current, next, size) == 0 
+            || memcmp(previous, next, size) == 0) {
             randomize();
         } else {
             // copy
-            memcpy(previous, current, width * height * sizeof(CRGB));
-            memcpy(current, next, width * height * sizeof(CRGB));
+            memcpy(previous, current, size);
+            memcpy(current, next, size);
         }
 
         // display the leds
         for (uint8_t x=0; x<width; x++) {
             for (uint8_t y=0; y<height; y++) {
-                leds[XY(x,y)] = current[y*width + x];
+                leds[XY(x,y)] = isAlive(x, y) ? getAlive(x, y) : getDead(x, y);
             }
         }
-        //memcpy(leds, current, width * height * sizeof(CRGB));
 
         for (uint16_t i=0; i<width * height; i++) {
             leds[i].r = leds[i].r * configuration.ledBrightness; 
@@ -84,9 +83,9 @@ void CMatrixModeGameOfLife::randomize() {
     uint16_t size = width * height;    
     for (uint16_t i=0; i<size; i++) {
         if (rand() % 100 <= populationDensity)  {
-            current[i] = live;
+            current[i] = 1;
         } else {
-            current[i] = dead;
+            current[i] = 0;
         }
     }
 }
@@ -107,12 +106,20 @@ uint8_t CMatrixModeGameOfLife::howManyNeighbors(uint8_t x, uint8_t y) {
     return n;
 }
 
-bool CMatrixModeGameOfLife::isAlive(uint8_t x, uint8_t y) {
+bool CMatrixModeGameOfLife::isAlive(const uint8_t x, const uint8_t y) {
     if (x<0) return false;
     if (x>=width) return false;
     if (y<0) return false;
     if (y>=height) return false;
 
-    if (current[y*width + x] == live) return true;
+    if (current[y*width + x]) return true;
     else return false;
+}
+
+CRGB CMatrixModeGameOfLife::getAlive(const uint8_t x, const uint8_t y) {
+    return CRGB(rand() % 256, rand() % 256, rand() % 256);
+}
+
+CRGB CMatrixModeGameOfLife::getDead(const uint8_t x, const uint8_t y) {
+    return dead;
 }

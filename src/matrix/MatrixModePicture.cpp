@@ -3,12 +3,10 @@
 
 #define BITMAP_BYTES_PER_PIXEL 4
 
-CMatrixModePicture::CMatrixModePicture(uint8_t width, uint8_t height, uint8_t *bitmap, uint8_t numBitmaps)
-: CBaseMatrixMode(width, height) {
+CMatrixModePicture::CMatrixModePicture(uint8_t width, uint8_t height, const uint8_t *bitmap, const uint8_t numBitmaps)
+: CBaseMatrixMode(width, height), bitmap(bitmap), numBitmaps(numBitmaps) {
     index = 0;
     indexChange = false;
-    this->bitmap = bitmap;
-    this->numBitmaps = numBitmaps;
 }
 
 void CMatrixModePicture::draw(CRGB *leds) {

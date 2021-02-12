@@ -1,9 +1,8 @@
 #include <Arduino.h>
 #include "BaseMatrixMode.h"
 
-CBaseMatrixMode::CBaseMatrixMode(uint8_t width, uint8_t height) {
-    this->width = width;
-    this->height = height;
+CBaseMatrixMode::CBaseMatrixMode(uint8_t width, uint8_t height):
+width(width), height(height) {
     tMillis = millis();
 }
 
