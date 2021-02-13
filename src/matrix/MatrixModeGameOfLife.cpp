@@ -117,7 +117,20 @@ bool CMatrixModeGameOfLife::isAlive(const uint8_t x, const uint8_t y) {
 }
 
 CRGB CMatrixModeGameOfLife::getAlive(const uint8_t x, const uint8_t y) {
-    return CRGB(rand() % 256, rand() % 256, rand() % 256);
+
+    uint8_t n = howManyNeighbors(x, y);
+
+    if (n == 8) return CRGB(250, 250, 250);
+    if (n == 7) return CRGB(200, 200, 200);
+    if (n == 6) return CRGB(160, 160, 160);
+    if (n == 5) return CRGB(80, 80, 80);
+    if (n == 4) return CRGB(40, 40, 40);
+    if (n == 3) return CRGB(20, 20, 20);
+    if (n == 2) return CRGB(10, 10, 10);
+    if (n == 1) return CRGB(5, 5 , 5);
+    if (n ==0) return CRGB(1, 1, 1);
+
+    //return CRGB(rand() % 256, rand() % 256, rand() % 256);
 }
 
 CRGB CMatrixModeGameOfLife::getDead(const uint8_t x, const uint8_t y) {
