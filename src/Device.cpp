@@ -104,7 +104,7 @@ void CDevice::loop() {
   keyEventCounter[_keyStatus]++;
 
   // Filter the noise and focus only on the most prominent event during the time period 
-  if (millis() - tMillisKey > 10) {
+  if (millis() - tMillisKey > 50) {
       tMillisKey = millis();
       uint16_t max = 0;
       key_status_t maxKey = KEY_NONE;
@@ -116,14 +116,16 @@ void CDevice::loop() {
       }
       memset(keyEventCounter, 0, sizeof(keyEventCounter));
       
-      if (maxKey != KEY_NONE) {
-          log_d("Notifying listeners about pressed key %i", maxKey);
+      if (maxKey != KEY_NONE || filteredKeyStatus != maxKey) {
+          log_v("Notifying listeners about pressed key %i", maxKey);
           listener_t *cur = this->listener;
           while(cur) {
               cur->listener(maxKey);
               cur = cur->next;
           }
       }
+
+      filteredKeyStatus = maxKey;
   }
 
 }

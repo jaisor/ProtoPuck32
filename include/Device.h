@@ -82,6 +82,7 @@ private:
 #endif
 
     key_status_t _keyStatus; 
+    key_status_t filteredKeyStatus;
     uint16_t keyEventCounter[NUM_KEYS];
 
     listener_t *listener; // Linked list of TKeyListener nodes
