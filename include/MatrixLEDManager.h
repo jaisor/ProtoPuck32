@@ -15,14 +15,14 @@ private:
 
     CRGB *leds;
 
-    uint8_t width, height;
+    const uint8_t width, height;
 
     std::vector<CBaseMatrixMode*> modes;
     int8_t currentModeIndex;
     int8_t changeMode;
 
 public:
-	CMatrixLEDManager(CRGB *leds, uint8_t width, uint8_t height, float brightness);
+	CMatrixLEDManager(CRGB *leds, const uint8_t width, const uint8_t height, float brightness);
 
 #ifdef OLED
     virtual uint16_t OLED_Status(Adafruit_GFX *oled);

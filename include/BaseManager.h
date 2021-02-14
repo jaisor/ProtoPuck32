@@ -11,7 +11,6 @@
     #include <Adafruit_GFX.h>
 #endif
 
-
 class CBaseManager {
 
 public:

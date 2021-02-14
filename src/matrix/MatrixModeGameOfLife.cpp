@@ -130,7 +130,7 @@ CRGB CMatrixModeGameOfLife::getAlive(const uint8_t x, const uint8_t y) {
     if (n == 1) return CRGB(5, 5 , 5);
     if (n ==0) return CRGB(1, 1, 1);
 
-    //return CRGB(rand() % 256, rand() % 256, rand() % 256);
+    return CRGB(rand() % 256, rand() % 256, rand() % 256);
 }
 
 CRGB CMatrixModeGameOfLife::getDead(const uint8_t x, const uint8_t y) {

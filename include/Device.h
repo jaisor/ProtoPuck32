@@ -33,7 +33,6 @@
 class CDevice {
 
 public:
-
     typedef std::function<void(key_status_t)> TKeyListener;
     struct listener_t {
         TKeyListener listener;
@@ -45,8 +44,8 @@ public:
     void loop();
 
 #ifdef TEMP_SENSOR
-    float temperature() const { return _temperature; };
-    float humidity() const { return _humidity; };
+    float temperature() const { return _bme->readTemperature(); /*_temperature;*/ };
+    float humidity() const { return _bme->readHumidity(); /*_humidity;*/ };
     float altitude() const { return _altitude; };
 #endif
 
@@ -59,10 +58,12 @@ public:
     Adafruit_SSD1306* display() const { return _display; };
 #endif
 
+    key_status_t keyStatus() const { return _keyStatus; };
+
     void addKeyListener(TKeyListener listener);
 
 private:
-
+    
     unsigned long tMillisTemp;
     unsigned long tMillisKey;
 
@@ -80,7 +81,7 @@ private:
     Adafruit_BME280 *_bme;
 #endif
 
-    key_status_t keyStatus; 
+    key_status_t _keyStatus; 
     uint16_t keyEventCounter[NUM_KEYS];
 
     listener_t *listener; // Linked list of TKeyListener nodes

@@ -9,12 +9,12 @@
 class CLEDManager: public CBaseManager {
 
 protected:
-    uint16_t size;
+    const uint16_t size;
     float_t brightness;
     float_t brightnessChange;
 
 public:
-	CLEDManager(uint16_t size, float brightness);
+	CLEDManager(const uint16_t size, float brightness);
 
 #ifdef LED
     virtual uint16_t LED_Status(CRGB *leds) { return 0; };

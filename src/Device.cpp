@@ -1,14 +1,9 @@
 #include <Arduino.h>
 #include "Device.h"
 
-const unsigned char _key_bitmaps [6][8] PROGMEM = {
-    { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, // NONE
-	{ 0x0, 0x10, 0x38, 0x7c, 0x10, 0x10, 0x10, 0x0 }, // UP
-    { 0x0, 0x10, 0x10, 0x10, 0x7c, 0x38, 0x10, 0x0 }, // DOWN
-    { 0x0, 0x0, 0x10, 0x30, 0x7e, 0x30, 0x10, 0x0 }, // LEFT
-    { 0x0, 0x0, 0x8, 0xc, 0x7e, 0xc, 0x8, 0x0 }, // RIGHT
-    { 0x0, 0x0, 0x54, 0x38, 0x7c, 0x38, 0x54, 0x0 } // MIDDLE
-};
+#include <Wire.h>
+#include <EEPROM.h>
+#include <FastLED.h>
 
 key_status_t operator ++( key_status_t &id, int ) {
   key_status_t currentID = id;
@@ -51,12 +46,13 @@ CDevice::CDevice() {
 #endif
 
 #ifdef KEYPAD
-  keyStatus = KEY_NONE;
+  _keyStatus = KEY_NONE;
   listener = nullptr;
   tMillisKey = millis();
   memset(keyEventCounter, 0, sizeof(keyEventCounter));
 #endif
 
+  log_i("Initialized");
 }
 
 CDevice::~CDevice() { 
@@ -65,88 +61,47 @@ CDevice::~CDevice() {
 #endif
 
 #ifdef TEMP_SENSOR
-    delete _bme;
+  delete _bme;
 #endif
+  log_i("Destroyed");
 }
 
 void CDevice::loop() {
-
-  // DEBUG: show key resistence value and bitmap
-  display()->setTextSize(1);
-  display()->setCursor(70, 24);
-  display()->print("K:");
-  display()->print(String(analogRead(KEYPAD_PIN)));
-
-  display()->drawBitmap(116, 24, _key_bitmaps[keyStatus], 8, 8, 1);
-
-  
-#ifdef OLED
-
-  // FIXME
-  // display temperature
-  display()->setCursor(0,16);
-  display()->print("Temperature: ");
-  display()->setTextSize(2);
-  display()->setCursor(0,24);
-
-#ifdef TEMP_SENSOR
-    int temp = _bme->readTemperature();
-
-    bool tempInC = false;
-    display()->print(String(tempInC ? temp : (temp*9/5)+32 ));
-    display()->print(" ");
-    display()->setTextSize(1);
-    display()->cp437(true);
-    display()->write(167);
-    display()->setTextSize(2);
-    display()->print(tempInC ? "C" : "F");
-    
-    // display humidity
-    display()->setTextSize(1);
-    display()->setCursor(0, 40);
-    display()->print("Humidity: ");
-    display()->setTextSize(2);
-    display()->setCursor(0, 48);
-    display()->print(String(_bme->readHumidity(), 1));
-    display()->print("%"); 
-#endif
-
-#endif
 
   // Scan keypad
   uint16_t k = analogRead(KEYPAD_PIN);
 
   #ifdef ALEX_GIFT
     if (k > 3900) {
-        keyStatus = KEY_NONE;
+        _keyStatus = KEY_NONE;
     } else if (k > 2300 && k < 2500) {
-        keyStatus = KEY_RIGHT;
+        _keyStatus = KEY_RIGHT;
     } else if (k < 300) {
-        keyStatus = KEY_LEFT;
+        _keyStatus = KEY_LEFT;
     } else if (k > 2600 && k < 3000) {
-        keyStatus = KEY_UP;
+        _keyStatus = KEY_UP;
     } else if (k > 1200 && k < 1700) {
-        keyStatus = KEY_DOWN;
+        _keyStatus = KEY_DOWN;
     } else if (k > 3200 && k < 3400) {
-        keyStatus = KEY_MIDDLE;
+        _keyStatus = KEY_MIDDLE;
     }
   #else
     if (k > 4000) {
-        keyStatus = KEY_NONE;
+        _keyStatus = KEY_NONE;
     } else if (k > 2300 && k < 2500) {
-        keyStatus = KEY_LEFT;
+        _keyStatus = KEY_LEFT;
     } else if (k < 300) {
-        keyStatus = KEY_RIGHT;
+        _keyStatus = KEY_RIGHT;
     } else if (k > 2600 && k < 3000) {
-        keyStatus = KEY_DOWN;
+        _keyStatus = KEY_DOWN;
     } else if (k > 1000 && k < 1600) {
-        keyStatus = KEY_UP;
+        _keyStatus = KEY_UP;
     } else if (k > 3200 && k < 3400) {
-        keyStatus = KEY_MIDDLE;
+        _keyStatus = KEY_MIDDLE;
     }
   #endif 
 
-  keyEventCounter[keyStatus]++;
+  keyEventCounter[_keyStatus]++;
 
   // Filter the noise and focus only on the most prominent event during the time period 
   if (millis() - tMillisKey > 10) {
@@ -162,6 +117,7 @@ void CDevice::loop() {
       memset(keyEventCounter, 0, sizeof(keyEventCounter));
       
       if (maxKey != KEY_NONE) {
+          log_d("Notifying listeners about pressed key %i", maxKey);
           listener_t *cur = this->listener;
           while(cur) {
               cur->listener(maxKey);

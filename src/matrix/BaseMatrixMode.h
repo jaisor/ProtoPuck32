@@ -13,8 +13,8 @@ protected:
     const uint8_t width;
     const uint8_t height;
 
-    uint16_t XY( uint8_t x, uint8_t y);
-    uint16_t XYsafe( uint8_t x, uint8_t y);
+    uint16_t XY(uint8_t x, uint8_t y);
+    uint16_t XYsafe(uint8_t x, uint8_t y);
 
 public:
 	CBaseMatrixMode(const uint8_t width, const uint8_t height);
