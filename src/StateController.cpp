@@ -12,6 +12,8 @@
   #include "DemoLEDManager.h"
 #endif
 
+#define CONFIG_INVOKE_TIME_MS 3000
+
 const unsigned char _key_bitmaps [6][8] PROGMEM = {
   { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, // NONE
   { 0x0, 0x10, 0x38, 0x7c, 0x10, 0x10, 0x10, 0x0 }, // UP
@@ -121,9 +123,14 @@ void CStateController::loop() {
             case S_INVOKING_CONFIG: {
             #ifdef OLED
                 uint16_t dt = millis() - tMillisConfig;
-                if (dt > 2500) {
-                    uint16_t dta = (dt-2500)*32/2500;
-                    display->fillCircle(128/2, 64/2, dta, WHITE);
+                if (dt > CONFIG_INVOKE_TIME_MS - 1000) {
+                    float dta = ((float)dt-1000.0)/((float)CONFIG_INVOKE_TIME_MS-1000.0);
+                    uint8_t w = dta * 64;
+                    display->fillRoundRect(64-w, 4, w*2, 62, 4, WHITE);
+                    display->setTextColor(INVERSE);
+                    display->setTextSize(2);
+                    display->setCursor(20,20);
+                    display->print("CONFIGURATION");
                 }
             #endif
             } break;
@@ -171,8 +178,13 @@ void CStateController::keyEvent(key_status_t key) {
             if (state == S_HOME_SCREEN) {
                 state = S_INVOKING_CONFIG;
                 tMillisConfig = millis();
-            } else if (state == S_INVOKING_CONFIG && millis() - tMillisConfig > 5000) {
+            } else if (state == S_INVOKING_CONFIG && millis() - tMillisConfig > CONFIG_INVOKE_TIME_MS) {
                 state = S_CONFIG_MAIN;
+                tMillisConfig = millis();
+            }
+
+            if (state == S_CONFIG_MAIN && millis() - tMillisConfig > 2000) {
+                state = S_HOME_SCREEN;
             }
         } break;
         default: {
