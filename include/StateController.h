@@ -7,7 +7,7 @@
 typedef enum {
     S_HOME_SCREEN = 0,
     S_INVOKING_CONFIG,
-    S_CONFIG_MAIN,
+    S_CONFIG,
 } state_t;
 
 class CStateController: public CBaseManager {
@@ -25,9 +25,14 @@ private:
     unsigned long tMillisConfig;
     
     std::vector<CBaseManager*> managers;
+    CBaseManager *configManager;
     CDevice *device;
 
     state_t state;
+
+    void drawStateHome();
+    void drawStateInvokeConfig();
+    void drawStateConfig();
     
 };
 

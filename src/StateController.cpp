@@ -5,6 +5,7 @@
 
 #include "WifiManager.h"
 #include "InternalLEDManager.h"
+#include "config/ConfigManager.h"
 
 #ifdef LED_EXTERNAL_MATRIX
   #include "MatrixLEDManager.h"
@@ -12,7 +13,8 @@
   #include "DemoLEDManager.h"
 #endif
 
-#define CONFIG_INVOKE_TIME_MS 3000
+#define CONFIG_INVOKE_TIME_MS 2000
+#define CONFIG_INVOKE_DELAY_TIME_MS 500
 
 const unsigned char _key_bitmaps [6][8] PROGMEM = {
   { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }, // NONE
@@ -25,6 +27,8 @@ const unsigned char _key_bitmaps [6][8] PROGMEM = {
 
 CStateController::CStateController(CDevice *device)
 :device(device) {
+
+    configManager = new CConfigManager();
 
 #ifdef WIFI
     managers.push_back(new CWifiManager());
@@ -61,101 +65,14 @@ void CStateController::loop() {
     if (millis() - tMillis > 100) {
         
         tMillis = millis();
-
         device->display()->clearDisplay();
-        Adafruit_GFX *display = device->display();
 
-        //
         switch (state) {
-            case S_HOME_SCREEN: {
-
-            for(CBaseManager *manager : managers) {
-            #ifdef OLED
-                manager->OLED_Status(display);
-            #endif
-            #ifdef LED
-                manager->LED_Status(device->ledsInternal());
-            #endif
-            }
-
-            #ifdef OLED
-
-                // DEBUG: show key resistence value and bitmap
-                display->setTextSize(1);
-                display->setCursor(70, 24);
-                display->print("K:");
-                display->print(String(analogRead(KEYPAD_PIN)));
-                display->drawBitmap(116, 24, _key_bitmaps[device->keyStatus()], 8, 8, 1);
-
-                // FIXME
-                // display temperature
-                display->setCursor(0,16);
-                display->print("Temperature: ");
-                display->setTextSize(2);
-                display->setCursor(0,24);
-
-            #ifdef TEMP_SENSOR
-                int temp = device->temperature();
-
-                bool tempInC = false;
-                display->print(String(tempInC ? temp : (temp*9/5)+32 ));
-                display->print(" ");
-                display->setTextSize(1);
-                display->cp437(true);
-                display->write(167);
-                display->setTextSize(2);
-                display->print(tempInC ? "C" : "F");
-
-                // display humidity
-                display->setTextSize(1);
-                display->setCursor(0, 40);
-                display->print("Humidity: ");
-                display->setTextSize(2);
-                display->setCursor(0, 48);
-                display->print(String(device->humidity(), 1));
-                display->print("%"); 
-            #endif // TEMP_SENSOR
-
-            #endif // OLED
-
-            } break;
-
-            case S_INVOKING_CONFIG: {
-            #ifdef OLED
-                uint16_t dt = millis() - tMillisConfig;
-                if (dt > CONFIG_INVOKE_TIME_MS - 1000) {
-                    float dta = ((float)dt-1000.0)/((float)CONFIG_INVOKE_TIME_MS-1000.0);
-                    uint8_t w = dta * 64;
-                    display->fillRoundRect(64-w, 4, w*2, 62, 4, WHITE);
-                    display->setTextColor(INVERSE);
-                    display->setTextSize(2);
-                    display->setCursor(20,20);
-                    display->print("CONFIGURATION");
-                }
-            #endif
-            } break;
-
-            case S_CONFIG_MAIN: {
-            #ifdef OLED
-                display->drawRect(0, 0, 128, 64, WHITE);
-                display->fillRect(0, 0, 128, 11, WHITE);
-                display->setTextColor(INVERSE);
-                display->setTextSize(1);
-                display->setCursor(2,2);
-                display->print("Configuration");
-                display->fillRect(2, 21, 124, 11, WHITE);
-                for (int i=0; i<5; i++) {
-                    display->setCursor(3,13 + i * 9);
-                    display->printf("item %i", i);
-                }
-                display->setTextColor(WHITE);
-            #endif
-            } break;
-
+            case S_HOME_SCREEN: drawStateHome(); break;
+            case S_INVOKING_CONFIG: drawStateInvokeConfig(); break;
+            case S_CONFIG: drawStateConfig(); break;
             default: ;
         }
-
-        
         
     #ifdef LED
         FastLED.show();
@@ -170,6 +87,84 @@ void CStateController::loop() {
 
 }
 
+void CStateController::drawStateHome() {
+
+    for(CBaseManager *manager : managers) {
+    #ifdef OLED
+        manager->OLED_Status(device->display());
+    #endif
+    #ifdef LED
+        manager->LED_Status(device->ledsInternal());
+    #endif
+    }
+
+#ifdef OLED
+    Adafruit_GFX *display = device->display();
+    // DEBUG: show key resistence value and bitmap
+    display->setTextSize(1);
+    display->setCursor(70, 24);
+    display->print("K:");
+    display->print(String(analogRead(KEYPAD_PIN)));
+    display->drawBitmap(116, 24, _key_bitmaps[device->keyStatus()], 8, 8, 1);
+
+    // FIXME
+    // display temperature
+    display->setCursor(0,16);
+    display->print("Temperature: ");
+    display->setTextSize(2);
+    display->setCursor(0,24);
+
+#ifdef TEMP_SENSOR
+    int temp = device->temperature();
+
+    bool tempInC = false;
+    display->print(String(tempInC ? temp : (temp*9/5)+32 ));
+    display->print(" ");
+    display->setTextSize(1);
+    display->cp437(true);
+    display->write(167);
+    display->setTextSize(2);
+    display->print(tempInC ? "C" : "F");
+
+    // display humidity
+    display->setTextSize(1);
+    display->setCursor(0, 40);
+    display->print("Humidity: ");
+    display->setTextSize(2);
+    display->setCursor(0, 48);
+    display->print(String(device->humidity(), 1));
+    display->print("%"); 
+#endif // TEMP_SENSOR
+
+#endif // OLED
+}
+
+void CStateController::drawStateInvokeConfig() {
+    uint16_t dt = millis() - tMillisConfig;
+    if (dt > CONFIG_INVOKE_DELAY_TIME_MS) {
+    #ifdef OLED
+        Adafruit_GFX *display = device->display();
+
+        float dta = sqrt(((float)dt-CONFIG_INVOKE_DELAY_TIME_MS)/((float)CONFIG_INVOKE_TIME_MS-CONFIG_INVOKE_DELAY_TIME_MS));
+        uint8_t w = dta * 64;
+        display->fillRoundRect(64-w, 4, w*2, 58, 4, WHITE);
+        display->setTextColor(INVERSE);
+        display->setTextSize(3);
+        display->setCursor(10,25);
+        display->print("CONFIG");        
+    #endif
+    } else {
+        drawStateHome();
+    }
+}
+
+void CStateController::drawStateConfig() {
+#ifdef OLED
+    configManager->OLED_Status(device->display());
+    configManager->LED_Status(device->ledsInternal());
+#endif
+}
+
 #ifdef KEYPAD
 void CStateController::keyEvent(key_status_t key) {
 
@@ -179,11 +174,11 @@ void CStateController::keyEvent(key_status_t key) {
                 state = S_INVOKING_CONFIG;
                 tMillisConfig = millis();
             } else if (state == S_INVOKING_CONFIG && millis() - tMillisConfig > CONFIG_INVOKE_TIME_MS) {
-                state = S_CONFIG_MAIN;
+                state = S_CONFIG;
                 tMillisConfig = millis();
             }
 
-            if (state == S_CONFIG_MAIN && millis() - tMillisConfig > 2000) {
+            if (state == S_CONFIG && millis() - tMillisConfig > 2000) {
                 state = S_HOME_SCREEN;
             }
         } break;
@@ -192,6 +187,10 @@ void CStateController::keyEvent(key_status_t key) {
                 state = S_HOME_SCREEN; // Keep last state or stack
             }
         };
+    }
+
+    if (state == S_CONFIG) {
+        configManager->keyEvent(key);
     }
 
 }
