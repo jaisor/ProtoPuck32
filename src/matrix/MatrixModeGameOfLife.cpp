@@ -8,9 +8,9 @@ CMatrixModeGameOfLife::CMatrixModeGameOfLife(const uint8_t width, const uint8_t 
     next = new uint8_t[size];
     previous = new uint8_t[size];
 
-    live = CRGB(255, 255, 255);
     dead = CRGB(0, 0, 0);
-    populationDensity = 10; // percent of initially alive cells
+    live = CRGB(0, 0, 255);
+    populationDensity = 30; // percent of initially alive cells
 
     randomize();
 
@@ -18,7 +18,7 @@ CMatrixModeGameOfLife::CMatrixModeGameOfLife(const uint8_t width, const uint8_t 
 
 void CMatrixModeGameOfLife::draw(CRGB *leds) {
 
-    if (millis() - tMillis >100) {
+    if (millis() - tMillis > 100) {
         tMillis = millis();
 
         for (uint8_t x=0; x<width; x++) {
@@ -53,7 +53,6 @@ void CMatrixModeGameOfLife::draw(CRGB *leds) {
             memcpy(previous, current, size);
             memcpy(current, next, size);
         }
-
         // display the leds
         for (uint8_t x=0; x<width; x++) {
             for (uint8_t y=0; y<height; y++) {
@@ -120,6 +119,8 @@ CRGB CMatrixModeGameOfLife::getAlive(const uint8_t x, const uint8_t y) {
 
     uint8_t n = howManyNeighbors(x, y);
 
+    return CRGB(live.r / (n + 1), live.g / (n + 1), live.b / (n + 1));
+
     if (n == 8) return CRGB(250, 250, 250);
     if (n == 7) return CRGB(200, 200, 200);
     if (n == 6) return CRGB(160, 160, 160);
@@ -134,5 +135,8 @@ CRGB CMatrixModeGameOfLife::getAlive(const uint8_t x, const uint8_t y) {
 }
 
 CRGB CMatrixModeGameOfLife::getDead(const uint8_t x, const uint8_t y) {
-    return dead;
+
+    uint8_t n = howManyNeighbors(x, y);
+
+    return CRGB(dead.r / (n + 1), dead.g / (n + 1), dead.b / (n + 1));
 }
