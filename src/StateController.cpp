@@ -45,9 +45,11 @@ CStateController::CStateController(CDevice *device)
 
 #ifdef KEYPAD
   using std::placeholders::_1;
+  /*
   for(CBaseManager *manager : managers) {
     device->addKeyListener(std::bind(&CBaseManager::keyEvent, manager, _1));
   }
+  */
   device->addKeyListener(std::bind(&CBaseManager::keyEvent, this, _1));
 #endif
 
@@ -81,8 +83,13 @@ void CStateController::loop() {
         device->display()->display();
     }  
 
-    for(CBaseManager *manager : managers) {
-        manager->loop();
+    switch (state) {
+        case S_CONFIG: configManager->loop(); break;
+        default: {
+            for(CBaseManager *manager : managers) {
+                manager->loop();
+            }
+        };
     }
 
 }
@@ -156,11 +163,22 @@ void CStateController::drawStateInvokeConfig() {
     } else {
         drawStateHome();
     }
+
+#ifdef LED
+    CRGB *leds = device->ledsInternal();
+    memset(leds, 0, sizeof(CRGB)*LED_STRIP_SIZE);
+    for (uint8_t i=0; i<(dt * LED_STRIP_SIZE/2) / CONFIG_INVOKE_TIME_MS; i++) {
+        leds[i] = CRGB(50, 50, 50);
+        leds[LED_STRIP_SIZE - i - 1] = CRGB(50, 50, 50);
+    }
+#endif
 }
 
 void CStateController::drawStateConfig() {
 #ifdef OLED
     configManager->OLED_Status(device->display());
+#endif
+#ifdef LED
     configManager->LED_Status(device->ledsInternal());
 #endif
 }
@@ -189,8 +207,13 @@ void CStateController::keyEvent(key_status_t key) {
         };
     }
 
-    if (state == S_CONFIG) {
-        configManager->keyEvent(key);
+    switch (state) {
+        case S_CONFIG: configManager->keyEvent(key); break;
+        default: {
+            for(CBaseManager *manager : managers) {
+                manager->keyEvent(key);
+            }
+        };
     }
 
 }

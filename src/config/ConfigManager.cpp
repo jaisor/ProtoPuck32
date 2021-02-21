@@ -15,6 +15,19 @@ CConfigManager::CConfigManager() {
 
 uint16_t CConfigManager::LED_Status(CRGB *leds) {
 
+  CRGB even, odd;
+
+  if (((millis() - tMillis) / 500) % 2) {
+    even = CRGB(50, 50, 50);
+    odd = CRGB(0, 0, 0);
+  } else {
+    even = CRGB(0, 0, 0);
+    odd = CRGB(50, 50, 50);
+  }
+
+  for (uint8_t i=0; i<LED_STRIP_SIZE; i++) {
+    leds[i] = i % 2 == 0 ? even : odd;
+  }
 };
 
 uint16_t CConfigManager::OLED_Status(Adafruit_GFX *oled) {
@@ -42,19 +55,10 @@ void CConfigManager::loop() {
 void CConfigManager::keyEvent(key_status_t key) {
 
     switch (key) {
-        case KEY_UP: itemIndex--; break;
-        case KEY_DOWN: itemIndex++; break;
+        case KEY_UP: if (itemIndex>0) itemIndex--; break;
+        case KEY_DOWN: if (itemIndex<configItems.size()-1) itemIndex++; break;
         case KEY_LEFT: ; break;
         case KEY_RIGHT: ; break;
         default: ;
     }
-
-    if (itemIndex>configItems.size()-1) {
-      itemIndex = configItems.size()-1;
-    }
-
-    if (itemIndex<0) {
-      itemIndex = 0;
-    }
-
 }

@@ -9,7 +9,7 @@ class CConfigManager: public CBaseManager {
 
 private:
     unsigned long tMillis;
-    signed int itemIndex;
+    uint8_t itemIndex;
 
     std::vector<CBaseConfigItem*> configItems;
     
