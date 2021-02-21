@@ -2,6 +2,7 @@
 #define _BASE_MANAGER_H
 
 #include "Configuration.h"
+#include "Device.h"
 
 #ifdef LED
     #include <FastLED.h>
@@ -9,19 +10,6 @@
 #ifdef OLED
     #include <Adafruit_GFX.h>
 #endif
-
-#ifdef KEYPAD
-    typedef enum {
-        KEY_NONE = 0,
-        KEY_UP,
-        KEY_DOWN,
-        KEY_LEFT,
-        KEY_RIGHT,
-        KEY_MIDDLE,
-        NUM_KEYS
-    } key_status_t;
-#endif
-
 
 class CBaseManager {
 

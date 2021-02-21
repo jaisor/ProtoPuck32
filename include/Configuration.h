@@ -54,11 +54,16 @@
 
 #ifdef OLED
     #define OLED_SCREEN_WIDTH 128 // OLED display width, in pixels
-    #define OLED_SCREEN_HEIGHT 64 // OLED display height, in pixels
+    #define OLED_SCREEN_HEIGHT 64 // OLED display height, in pixel
+    #define OLED_I2C_ID  0x3C
 #endif
 
 #ifdef KEYPAD
     #define KEYPAD_PIN 34
+#endif
+
+#ifdef TEMP_SENSOR
+    #define BME_I2C_ID  0x76
 #endif
 
 struct configuration_t {

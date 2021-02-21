@@ -239,10 +239,11 @@ void CWifiManager::handleRoot() {
       <input type='submit' value='Connect...'>\
     </form>\
     <br><br><hr>\
+    %s\
     <p>Uptime: %02d:%02d:%02d</p>\
   </body>\
 </html>",
-
+           getTempSensorResponse().c_str(),
            hr, min % 60, sec % 60
           );
   server.send(200, "text/html", temp);
@@ -277,7 +278,7 @@ void CWifiManager::handleConnect() {
     <p>Uptime: %02d:%02d:%02d</p>\
   </body>\
 </html>",
-    ssid,
+    ssid.c_str(),
     hr, min % 60, sec % 60
   );
 
@@ -295,6 +296,18 @@ void CWifiManager::handleConnect() {
 
   digitalWrite(BOARD_LED_PIN, HIGH);
   
+}
+
+String CWifiManager::getTempSensorResponse() {
+#ifdef TEMP_SENSOR
+  float temp = 12.3f;
+  return String("<div>\
+    Temperature: " + String(temp, 1) + "<br/>\
+    Hunidity: TODO <br/>\
+  </div>");
+#else
+  return "";
+#endif
 }
 
 #ifdef LED_EXTERNAL_MATRIX
