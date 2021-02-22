@@ -2,6 +2,12 @@
 
 Multi-purpose prototype box based on ESP32
 
+## Development
+
+USB driver for Windows required: [Silicon Labs CP210X](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)
+
+Recommended: [VSCode](https://code.visualstudio.com/) + [PlatformIO](https://platformio.org/)
+
 ## Issues
 
 LittleFS_esp32 library installed by PlatformIO seems broken, complaining about 

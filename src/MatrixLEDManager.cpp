@@ -8,12 +8,10 @@
 
 #include "matrix/bitmaps.h"
 
-CMatrixLEDManager::CMatrixLEDManager(CRGB *leds, uint8_t width, uint8_t height, float brightness)
-: CLEDManager(width * height, brightness) {
+CMatrixLEDManager::CMatrixLEDManager(CRGB *leds, const uint8_t width, const uint8_t height, float brightness)
+: CLEDManager(width * height, brightness), width(width), height(height) {
 
     this->leds = leds;
-    this->width = width;
-    this->height = height;
 
     tMillis = tMillsChangeMode = millis();
 

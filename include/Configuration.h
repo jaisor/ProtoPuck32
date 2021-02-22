@@ -9,7 +9,7 @@
 #define TEMP_SENSOR // Temperature, humidity, pressure
 #define KEYPAD      // Buttons
 
-#define ALEX_GIFT   // Temp, since the keyboard is flipped. TODO: implement key mapping sequence.
+//#define ALEX_GIFT   // Temp, since the keyboard is flipped. TODO: implement key mapping sequence.
 
 #define BOOT_BUTTON 0
 #define EEPROM_CONFIGURATION_START 0    // First EEPROM byte to be used for storing the configuration
@@ -54,11 +54,16 @@
 
 #ifdef OLED
     #define OLED_SCREEN_WIDTH 128 // OLED display width, in pixels
-    #define OLED_SCREEN_HEIGHT 64 // OLED display height, in pixels
+    #define OLED_SCREEN_HEIGHT 64 // OLED display height, in pixel
+    #define OLED_I2C_ID  0x3C
 #endif
 
 #ifdef KEYPAD
     #define KEYPAD_PIN 34
+#endif
+
+#ifdef TEMP_SENSOR
+    #define BME_I2C_ID  0x76
 #endif
 
 struct configuration_t {

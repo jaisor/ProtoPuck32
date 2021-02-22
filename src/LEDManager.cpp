@@ -2,7 +2,7 @@
 #include "LEDManager.h"
 #include "Configuration.h"
 
-CLEDManager::CLEDManager(uint16_t size, float brigthness) {
-    this->size = size;
+CLEDManager::CLEDManager(const uint16_t size, float brigthness)
+: size(size) {
     this->brightness = brigthness;
 }
