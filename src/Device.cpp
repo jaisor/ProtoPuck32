@@ -88,7 +88,7 @@ void CDevice::loop() {
   #else
     if (k > 4000) {
         _keyStatus = KEY_NONE;
-    } else if (k > 2300 && k < 2500) {
+    } else if (k > 2000 && k < 2500) {
         _keyStatus = KEY_LEFT;
     } else if (k < 300) {
         _keyStatus = KEY_RIGHT;
