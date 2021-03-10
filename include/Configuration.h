@@ -22,6 +22,10 @@
     #define WIFI_FALLBACK_SSID "PP" // device chip id will be suffixed
     #define WIFI_FALLBACK_PASS "password123"
 
+    #define NTP_SERVER "pool.ntp.org"
+    #define NTP_GMT_OFFSET_SEC 0
+    #define NTP_DAYLIGHT_OFFSET_SEC 3600
+
     // Web server
     #define WEB_SERVER_PORT 80
 #endif
@@ -73,6 +77,9 @@ struct configuration_t {
     #ifdef WIFI
         char wifiSsid[32];
         char wifiPassword[63];
+        char ntpServer[128];
+        long gmtOffset_sec = 0;
+        int daylightOffset_sec = 3600;
     #endif
 
     #ifdef LED

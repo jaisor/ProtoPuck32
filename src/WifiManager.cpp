@@ -167,6 +167,16 @@ void CWifiManager::listen() {
   // MQTT
   client.setServer("192.168.10.10", 1883);
   client.setCallback(handle_mqtt_message);
+
+  // NTP
+  log_i("Configuring time from %s at %i (%i)", configuration.ntpServer, configuration.gmtOffset_sec, configuration.daylightOffset_sec);
+
+  configTime(configuration.gmtOffset_sec, configuration.daylightOffset_sec, configuration.ntpServer);
+  struct tm timeinfo;
+  if(getLocalTime(&timeinfo)){
+    log_i("%H:%M", timeinfo.tm_hour,timeinfo.tm_min);
+  }
+
   
 }
 
