@@ -148,11 +148,11 @@
     <text fill="#000000" x="2145" y="1247" text-anchor="middle" style="font-family: Arial; font-size: 12px;"/>
     <path fill="none" stroke="#000000" d="M2150,1300L2137.5,1300" stroke-width="2"/>
     <text fill="#000000" x="2130" y="1304" text-anchor="end" text-decoration="none" style="font-family: Arial; font-size: 12px;">B</text>
-    <text fill="#000000" x="2145" y="1297" text-anchor="middle" text-decoration="none" style="font-family: Arial; font-size: 12px;"/>
+    <text fill="#000000" x="2145" y="1297" text-anchor="middle" style="font-family: Arial; font-size: 12px;"/>
     <path style="stroke-linecap: round; stroke-miterlimit: 6;" fill="none" stroke="#000000" d="M25,20L25,0" stroke-width="2" stroke-linecap="round" stroke-miterlimit="6" transform="translate(2350,2050)"/>
     <path style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 6;" fill="#ffffff" stroke="#000000" d="M5,20L25,40L45,20Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="6" transform="translate(2350,2050)"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 1800 1500 L 1800 1643 A 7 7 0 1 1 1800 1657 L 1800 1750" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
-    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 1800 1750 L 2243 1750 A 7 7 0 1 1 2257 1750 L 2425 1750" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 1800 1750 L 2425 1750" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2325 1750 L 2325 1793 A 7 7 0 1 1 2325 1807 L 2325 2050" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2325 2050 L 2375 2050" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round; stroke-miterlimit: 6;" fill="#ffffff" stroke="#000000" d="M50,50C50,36.19374,38.806255,25,25,25C11.193755,25,0,36.19374,0,50C0,63.80632,11.193755,75,25,75C38.806255,75,50,63.80632,50,50" stroke-width="2" stroke-linecap="round" stroke-miterlimit="6" transform="translate(2350,1950)"/>
@@ -168,9 +168,8 @@
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 1700 1500 L 1700 1800" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 1700 1800 L 2425 1800" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 3000 1250 L 3000 1268 A 7 7 0 1 1 3000 1282 L 3000 1293 A 7 7 0 1 1 3000 1307 L 3000 1668 A 7 7 0 1 1 3000 1682 L 3000 1718 A 7 7 0 1 1 3000 1732 L 3000 1743 A 7 7 0 1 1 3000 1757 L 3000 1800" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
-    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2725 1800 L 3000 1800" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 3050 1250 L 3050 1268 A 7 7 0 1 1 3050 1282 L 3050 1293 A 7 7 0 1 1 3050 1307 L 3050 1668 A 7 7 0 1 1 3050 1682 L 3050 1718 A 7 7 0 1 1 3050 1732 L 3050 1750" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
-    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2725 1750 L 3050 1750" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2725 1750 L 2768 1750 A 7 7 0 1 1 2782 1750 L 3050 1750" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 3075 1575 L 3150 1575" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 3000 1800 L 3075 1800" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 3050 1625 L 3068 1625 A 7 7 0 1 1 3082 1625 L 3150 1625" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
@@ -191,14 +190,19 @@
       <tspan dy="-2.3999999999999995">R1</tspan>
       <tspan dy="19.2" x="0">10 kΩ</tspan>
     </text>
-    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2250 1350 L 2250 1643 A 7 7 0 1 1 2250 1657 L 2250 1800" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 3075 1575 L 3075 1800" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
-    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2150 1300 L 2200 1300" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
-    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2200 1300 L 2200 1643 A 7 7 0 1 1 2200 1657 L 2200 1750" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2150 1300 L 2175 1300" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2150 1250 L 2425 1250" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2325 1250 L 2325 1275" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 1750 1500 L 1750 1650" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 1750 1650 L 2425 1650" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2725 1800 L 3000 1800" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2250 1350 L 2250 1575" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2250 1575 L 2775 1575" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2775 1575 L 2775 1800" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2175 1300 L 2175 1625" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2175 1625 L 2750 1625" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
+    <path style="stroke-linecap: round;" fill="none" stroke="#000000" d="M 2750 1625 L 2750 1750" stroke-width="2" stroke-linecap="round" class="cl_wire"/>
     <circle cx="2375" cy="2050" r="3" fill="#000000" stroke="#000000"/>
     <circle cx="2325" cy="1750" r="3" fill="#000000" stroke="#000000"/>
     <circle cx="2375" cy="1800" r="3" fill="#000000" stroke="#000000"/>
@@ -206,8 +210,8 @@
     <circle cx="3050" cy="1625" r="3" fill="#000000" stroke="#000000"/>
     <circle cx="2925" cy="1275" r="3" fill="#000000" stroke="#000000"/>
     <circle cx="2900" cy="1300" r="3" fill="#000000" stroke="#000000"/>
-    <circle cx="2250" cy="1800" r="3" fill="#000000" stroke="#000000"/>
-    <circle cx="2200" cy="1750" r="3" fill="#000000" stroke="#000000"/>
     <circle cx="2325" cy="1250" r="3" fill="#000000" stroke="#000000"/>
+    <circle cx="2775" cy="1800" r="3" fill="#000000" stroke="#000000"/>
+    <circle cx="2750" cy="1750" r="3" fill="#000000" stroke="#000000"/>
   </g>
 </svg>
