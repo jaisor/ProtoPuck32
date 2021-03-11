@@ -6,6 +6,7 @@
 #include "matrix/MatrixModeGameOfLife.h"
 #include "matrix/MatrixModePixel.h"
 #include "matrix/MatrixModeFallingStars.h"
+#include "matrix/MatrixModeClock.h"
 
 #include "matrix/bitmaps.h"
 
@@ -16,6 +17,7 @@ CMatrixLEDManager::CMatrixLEDManager(CRGB *leds, const uint8_t width, const uint
 
     tMillis = tMillsChangeMode = millis();
 
+    modes.push_back(new CMatrixModeClock(width, height));
     modes.push_back(new CMatrixModeFallingStars(width, height));
     modes.push_back(new CMatrixModePixel(width, height));
     modes.push_back(new CMatrixModeGameOfLife(width, height));

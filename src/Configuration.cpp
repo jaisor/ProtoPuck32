@@ -22,6 +22,9 @@ void EEPROM_loadConfig() {
     configuration._loaded = true;
     #ifdef LED
       configuration.ledBrightness = LED_BRIGHTNESS;
+      strcpy(configuration.ntpServer, NTP_SERVER);
+      configuration.gmtOffset_sec = NTP_GMT_OFFSET_SEC;
+      configuration.daylightOffset_sec = NTP_DAYLIGHT_OFFSET_SEC;
     #endif
   }
 

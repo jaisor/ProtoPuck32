@@ -51,9 +51,7 @@ void CMatrixModeFallingStars::randomize() {
         stars[i].x = rand() % width - 1;
         stars[i].y = rand() % height - 1;
         stars[i].v = rand() % 5 + 1;
-        stars[i].color = rand()% CRGB(255, 255, 0);{i}
-        CRGB(255, 255, 255);
-    }
+        stars[i].color = rand()% CRGB(255, 255, 0);
     }
 
 }
