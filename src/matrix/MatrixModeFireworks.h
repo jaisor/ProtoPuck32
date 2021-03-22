@@ -8,13 +8,11 @@
 #include <FastLED.h>
 #include <Adafruit_GFX.h>
 
-#define NUM_FIREWORKS 5
-
 class CMatrixModeFireworks : public CBaseMatrixMode {
 
 private:
     GFXcanvas16 *canvas;
-    CFirework fireworks[NUM_FIREWORKS];
+    CFirework** fireworks;
 
 public:
 	CMatrixModeFireworks(const uint8_t width, const uint8_t height);
