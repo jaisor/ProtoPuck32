@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <WiFiClient.h>
 #include <esp_wifi.h>
+#include <ezTime.h>
 
 #include "WifiManager.h"
 #include "Configuration.h"
@@ -173,8 +174,9 @@ void CWifiManager::listen() {
 
   configTime(configuration.gmtOffset_sec, configuration.daylightOffset_sec, configuration.ntpServer);
   struct tm timeinfo;
+  //time()
   if(getLocalTime(&timeinfo)){
-    log_i("%H:%M", timeinfo.tm_hour,timeinfo.tm_min);
+    log_i("%i:%i", timeinfo.tm_hour,timeinfo.tm_min);
   }
 
   

@@ -13,7 +13,10 @@ private:
     GFXcanvas16 *canvas;
     uint8_t h, m;
 
-    CRGB RGB565_to_CRGB(uint16_t a); // 5-6-5 16bit pixel conversion to 24bit CRGB
+    const uint16_t colMin, colHour, colText;
+
+    static CRGB RGB565_to_CRGB(uint16_t a); // 5-6-5 16bit pixel conversion to 24bit CRGB
+    static uint16_t CRGB_to_RGB565(CRGB c); // CRGB to 5-6-5 16bit pixel
 
 public:
 	CMatrixModeClock(const uint8_t width, const uint8_t height);

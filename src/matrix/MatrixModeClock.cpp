@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <Adafruit_GFX.h>
+#include <Fonts/Picopixel.h>
 #include "MatrixModeClock.h"
 
 #define BITMAP_BYTES_PER_PIXEL 4
@@ -32,8 +34,12 @@ const uint8_t BITMAP_CLOCK_FACE[] PROGMEM = {
 };
 
 CMatrixModeClock::CMatrixModeClock(const uint8_t width, const uint8_t height)
-: CBaseMatrixMode(width, height) {
+: CBaseMatrixMode(width, height), colMin(HAND_COLOR_MIN), colHour(HAND_COLOR_HOUR), colText(0x0001) {
     canvas = new GFXcanvas16(width, height);
+
+    canvas->setTextColor(colText);
+    canvas->setTextSize(1);
+    canvas->setFont(&Picopixel);
 }
 
 CMatrixModeClock::~CMatrixModeClock() {
@@ -42,7 +48,7 @@ CMatrixModeClock::~CMatrixModeClock() {
 
 void CMatrixModeClock::draw(CRGB *leds) {
 
-    if (millis() - tMillis > 10) {
+    if (millis() - tMillis > 100) {
         tMillis = millis();
         // clear
         memset(leds, 0, width * height * sizeof(CRGB));
@@ -82,18 +88,20 @@ void CMatrixModeClock::draw(CRGB *leds) {
         rad = (h - 3) * PI / 6;
         x = 11 + 5 * cos(rad);
         y = 11 + 5 * sin(rad);
-        canvas->drawLine(11, 11, x, y, HAND_COLOR_HOUR);
-        canvas->drawLine(10, 11, x-1, y, HAND_COLOR_HOUR);
-        canvas->drawLine(10, 12, x-1, y+1, HAND_COLOR_HOUR);
-        canvas->drawLine(12, 11, x+1, y, HAND_COLOR_HOUR);
-        canvas->drawLine(12, 12, x+1, y+1, HAND_COLOR_HOUR);
+        canvas->drawLine(11, 11, x, y, colHour);
+        canvas->drawLine(10, 11, x-1, y, colHour);
+        canvas->drawLine(10, 12, x-1, y+1, colHour);
+        canvas->drawLine(12, 11, x+1, y, colHour);
+        canvas->drawLine(12, 12, x+1, y+1, colHour);
         
         // Minutes
         rad = (m-15) * PI / 30;
         x = 11 + 9 * cos(rad);
         y = 11 + 9 * sin(rad);
-        canvas->drawLine(11, 11, x, y, HAND_COLOR_MIN);
-    
+        canvas->drawLine(11, 11, x, y, colMin);
+
+        canvas->setCursor(3, 18);
+        canvas->printf("%02i:%02i", h, m);
         
         //log_d("Min: %i, rad: %f, x: %i, y: %i", m, rad, x, y);
 
@@ -121,6 +129,10 @@ CRGB CMatrixModeClock::RGB565_to_CRGB(uint16_t color) {
     b = (((color & 0x1F) * 527) + 23) >> 6;
 
     return CRGB(r * configuration.ledBrightness, g * configuration.ledBrightness, b * configuration.ledBrightness);
+}
+
+uint16_t CMatrixModeClock::CRGB_to_RGB565(CRGB c) {
+    return  ((int(c.r / 255 * 31) << 11) | (int(c.g / 255 * 63) << 5) | (int(c.b / 255 * 31)));
 }
 
 #ifdef KEYPAD

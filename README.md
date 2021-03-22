@@ -59,3 +59,7 @@ Case - 3D printed, STL files:
 1. Remote controlled pixels via WiFi (HTTP Post or MQTT)
 1. Report sensors data and config out to HTTP or MQTT
 1. Remote control of config like brightness, mode, etc.
+1. Yellow top lines for Config - looks odd
+1. Web page headers and titles - remove Demo
+1. Get device location automatically if possible
+1. Expose current clock broadly, including periodical updates
