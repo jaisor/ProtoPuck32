@@ -23,8 +23,8 @@
     #define WIFI_FALLBACK_PASS "password123"
 
     #define NTP_SERVER "pool.ntp.org"
-    #define NTP_GMT_OFFSET_SEC 0
-    #define NTP_DAYLIGHT_OFFSET_SEC 3600
+    #define NTP_GMT_OFFSET_SEC -25200
+    #define NTP_DAYLIGHT_OFFSET_SEC 0
 
     // Web server
     #define WEB_SERVER_PORT 80

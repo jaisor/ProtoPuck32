@@ -1,17 +1,16 @@
 #ifndef _MATRIX_MODE_FIREWORKS_H
 #define _MATRIX_MODE_FIREWORKS_H
 
-#include "BaseMatrixMode.h"
+#include "BaseCanvasedMatrixMode.h"
 #include "firework/Firework.h"
 
 #ifdef LED_EXTERNAL_MATRIX
 #include <FastLED.h>
 #include <Adafruit_GFX.h>
 
-class CMatrixModeFireworks : public CBaseMatrixMode {
+class CMatrixModeFireworks : public CBaseCanvasedMatrixMode {
 
 private:
-    GFXcanvas16 *canvas;
     CFirework** fireworks;
 
 public:

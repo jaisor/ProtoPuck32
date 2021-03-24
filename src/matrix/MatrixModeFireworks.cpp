@@ -32,8 +32,7 @@ const uint8_t BITMAP[] PROGMEM = {
 };
 
 CMatrixModeFireworks::CMatrixModeFireworks(const uint8_t width, const uint8_t height)
-: CBaseMatrixMode(width, height) {
-    canvas = new GFXcanvas16(width, height);
+: CBaseCanvasedMatrixMode(width, height) {
     fireworks = new CFirework*[NUM_FIREWORKS];
     for(uint8_t i=0; i<NUM_FIREWORKS; i++) {
         fireworks[i] = new CFirework(width, height);
@@ -41,8 +40,6 @@ CMatrixModeFireworks::CMatrixModeFireworks(const uint8_t width, const uint8_t he
 }
 
 CMatrixModeFireworks::~CMatrixModeFireworks() {
-    delete canvas;
-
     for(uint8_t i=0; i<NUM_FIREWORKS; i++) {
         delete fireworks[i];
     }

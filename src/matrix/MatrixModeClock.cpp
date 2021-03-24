@@ -34,19 +34,24 @@ const uint8_t BITMAP_CLOCK_FACE[] PROGMEM = {
 };
 
 CMatrixModeClock::CMatrixModeClock(const uint8_t width, const uint8_t height)
-: CBaseMatrixMode(width, height), colMin(HAND_COLOR_MIN), colHour(HAND_COLOR_HOUR), colText(0x0001) {
-    canvas = new GFXcanvas16(width, height);
-
+: CBaseCanvasedMatrixMode(width, height), colMin(HAND_COLOR_MIN), colHour(HAND_COLOR_HOUR), colText(0x0001) {
+    
     canvas->setTextColor(colText);
     canvas->setTextSize(1);
     canvas->setFont(&Picopixel);
+
+    tMillisClockUpdate = 0;
 }
 
 CMatrixModeClock::~CMatrixModeClock() {
-    delete canvas;
 }
 
 void CMatrixModeClock::draw(CRGB *leds) {
+
+    if (millis() - tMillisClockUpdate > 10000) {
+        tMillisClockUpdate = millis();
+        timeUpdated = getLocalTime(&timeinfo);
+    }
 
     if (millis() - tMillis > 100) {
         tMillis = millis();
@@ -69,6 +74,7 @@ void CMatrixModeClock::draw(CRGB *leds) {
         canvas->fillScreen(0);
         //canvas->drawCircle(11, 11, 10, 0xffff);
 
+        /*
         m++;
         if (m>59) {
             m = 0;
@@ -77,9 +83,14 @@ void CMatrixModeClock::draw(CRGB *leds) {
                 h = 0;
             }
         }
+        */
 
-        //h = 0;
-        //m = 50;
+        if (!timeUpdated) {
+            return;
+        }
+
+        h = timeinfo.tm_hour;
+        m = timeinfo.tm_min;
 
         uint16_t x, y;
         double rad;
@@ -88,11 +99,7 @@ void CMatrixModeClock::draw(CRGB *leds) {
         rad = (h - 3) * PI / 6;
         x = 11 + 5 * cos(rad);
         y = 11 + 5 * sin(rad);
-        canvas->drawLine(11, 11, x, y, colHour);
-        canvas->drawLine(10, 11, x-1, y, colHour);
-        canvas->drawLine(10, 12, x-1, y+1, colHour);
-        canvas->drawLine(12, 11, x+1, y, colHour);
-        canvas->drawLine(12, 12, x+1, y+1, colHour);
+        drawThickLine(11, 11, x, y, colHour,2);
         
         // Minutes
         rad = (m-15) * PI / 30;
@@ -105,34 +112,9 @@ void CMatrixModeClock::draw(CRGB *leds) {
         
         //log_d("Min: %i, rad: %f, x: %i, y: %i", m, rad, x, y);
 
-        uint16_t *b = canvas->getBuffer();
-        for(uint8_t x=0; x<width; x++) {
-            for(uint8_t y=0; y<height; y++) {
-                uint16_t c565 = b[y * height + x];
-                if (c565) {
-                    leds[XY(x, y)] = RGB565_to_CRGB(b[y * height + x]);
-                }
-            }
-        }
+        drawCanvas(leds);
     }
     
-}
-
-CRGB CMatrixModeClock::RGB565_to_CRGB(uint16_t color) {
-
-    uint8_t r = ((color >> 11) & 0x1F);
-    uint8_t g = ((color >> 5) & 0x3F);
-    uint8_t b = (color & 0x1F);
-
-    r = ((((color >> 11) & 0x1F) * 527) + 23) >> 6;
-    g = ((((color >> 5) & 0x3F) * 259) + 33) >> 6;
-    b = (((color & 0x1F) * 527) + 23) >> 6;
-
-    return CRGB(r * configuration.ledBrightness, g * configuration.ledBrightness, b * configuration.ledBrightness);
-}
-
-uint16_t CMatrixModeClock::CRGB_to_RGB565(CRGB c) {
-    return  ((int(c.r / 255 * 31) << 11) | (int(c.g / 255 * 63) << 5) | (int(c.b / 255 * 31)));
 }
 
 #ifdef KEYPAD
