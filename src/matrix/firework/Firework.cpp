@@ -4,6 +4,7 @@
 CFirework::CFirework(const uint8_t width, const uint8_t height)
 : CBaseMatrixMode(width, height) {
     reset();
+    
 }
 
 void CFirework::reset() {
@@ -14,15 +15,22 @@ void CFirework::reset() {
     x = rand()%width;
     yxpl = rand()%(height-10);
 
-    yvel = 10 + rand()%90;
+    yvel = 40 + rand()%90;
     xplvel = rand()%10;
 
-    color = CRGB(rand()%155 + 100, rand()%155 + 100, rand()%155 + 100);
+    //color = CRGB(rand()%155 + 100, rand()%155 + 100, rand()%155 + 100);
+    color = ColorFromPalette( PartyColors_p, rand()%255, 255, LINEARBLEND);
 
     state = 0;
 }
 
 void CFirework::draw(CRGB *leds) {
+
+    CRGB c = CRGB(
+        color.r * configuration.ledBrightness, 
+        color.g * configuration.ledBrightness, 
+        color.b * configuration.ledBrightness
+    );
 
     if (state == 0) {
         
@@ -34,11 +42,28 @@ void CFirework::draw(CRGB *leds) {
                 state = 1;
             }
         }
-        leds[XYsafe(x, y)] = color;
+        leds[XYsafe(x, y)] = c;
 
     } else if (state == 1) {
         // Exploding
-        reset();
+
+        float t = sqrtf((float)(millis() - tMillis) / 1000.0);
+        float d = t * (float)xplvel * 1.2;
+        float b = 1.0 - t;
+        CRGB cb = CRGB(c.r * b, c.g * b, c.b * b);
+
+        leds[XYsafe(x, y-d)] = cb;
+        leds[XYsafe(x, y+d)] = cb;
+        leds[XYsafe(x-d, y)] = cb;
+        leds[XYsafe(x+d, y)] = cb;
+        leds[XYsafe(x-d, y-d)] = cb;
+        leds[XYsafe(x-d, y+d)] = cb;
+        leds[XYsafe(x-d, y+d)] = cb;
+        leds[XYsafe(x+d, y+d)] = cb;
+
+        if (millis() - tMillis > 1000) {
+            reset();
+        }
     }
 
 
