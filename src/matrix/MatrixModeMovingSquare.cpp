@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "MatrixModeMovingSquare.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 static float xf = (rand() % 1000) / 1000.0f;
 static float yf = (rand() % 1000) / 1000.0f;
 
@@ -64,4 +66,4 @@ void CMatrixModeMovingSquare::keyEvent(key_status_t key) {
 }
 #endif
 
-
+#endif

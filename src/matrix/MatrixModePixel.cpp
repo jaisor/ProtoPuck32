@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "MatrixModePixel.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 int x = 10;
 int y = 10;
 
@@ -38,4 +40,4 @@ void CMatrixModePixel::keyEvent(key_status_t key) {
 }
 #endif
 
-
+#endif

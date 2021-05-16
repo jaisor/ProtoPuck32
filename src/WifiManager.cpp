@@ -161,7 +161,7 @@ void CWifiManager::listen() {
   // Web
   server.on("/", std::bind(&CWifiManager::handleRoot, this));
   server.on("/connect", HTTP_POST, std::bind(&CWifiManager::handleConnect, this));
-  server.on("/led/external/matrix", HTTP_POST, std::bind(&CWifiManager::handleLEDMatrix, this));
+  //server.on("/led/external/matrix", HTTP_POST, std::bind(&CWifiManager::handleLEDMatrix, this));
   server.begin(WEB_SERVER_PORT);
   log_d("Web server listening on port %i", WEB_SERVER_PORT);
   

@@ -11,6 +11,8 @@
 
 #include "matrix/bitmaps.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 CMatrixLEDManager::CMatrixLEDManager(CRGB *leds, const uint8_t width, const uint8_t height, float brightness)
 : CLEDManager(width * height, brightness), width(width), height(height) {
 
@@ -72,4 +74,6 @@ uint16_t CMatrixLEDManager::OLED_Status(Adafruit_GFX *oled) {
     */
     return 0;
 }
+#endif
+
 #endif

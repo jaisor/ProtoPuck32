@@ -1,6 +1,8 @@
 #ifndef _FIREWORK_H
 #define _FIREWORK_H
 
+#ifdef LED_EXTERNAL_MATRIX
+
 #include <Arduino.h>
 #include "Configuration.h"
 #include "matrix/BaseMatrixMode.h"
@@ -23,5 +25,7 @@ public:
     void reset();
     virtual void draw(CRGB *leds);
 };
+
+#endif
 
 #endif
