@@ -40,7 +40,7 @@
     #define LED_EXTERNAL    
     #ifdef LED_EXTERNAL
         #define LED_EXTERNAL_PIN 12
-        #define LED_EXTERNAL_STRIP_SIZE 73 // 28
+        #define LED_EXTERNAL_STRIP_SIZE 280 // 70 PER LEAF // 28
         #define LED_EXTERNAL_BRIGHTNESS 0.2 // 0-1
         #define LED_EXTERNAL_TYPE WS2812B
         #define LED_EXTERNAL_COLOR_ORDER GRB

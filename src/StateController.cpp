@@ -10,7 +10,7 @@
 #ifdef LED_EXTERNAL_MATRIX
   #include "MatrixLEDManager.h"
 #else
-  #include "DemoLEDManager.h"
+  #include "LeafLEDManager.h"
 #endif
 
 #define CONFIG_INVOKE_TIME_MS 2000
@@ -39,7 +39,7 @@ CStateController::CStateController(CDevice *device)
     #ifdef LED_EXTERNAL_MATRIX
         managers.push_back(new CMatrixLEDManager(device->ledsExternal(), LED_EXTERNAL_MATRIX_WIDTH, LED_EXTERNAL_MATRIX_HEIGHT, LED_EXTERNAL_BRIGHTNESS)); 
     #else
-        managers.push_back(new CDemoLEDManager(device->ledsExternal(), LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS)); 
+        managers.push_back(new CLeafLEDManager(device->ledsExternal(), LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_BRIGHTNESS)); 
     #endif
 #endif
 
