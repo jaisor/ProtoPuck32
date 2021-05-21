@@ -35,7 +35,7 @@ CInternalLEDManager::CInternalLEDManager(uint16_t size, float brightness)
 uint16_t CInternalLEDManager::LED_Status(CRGB *leds) {
 
     uint8_t colorIndex = startIndex;
-    uint8_t b = brightness * brightness * 255;
+    uint8_t b = brightness * 255;
     
     for( int i = 0; i < size; i++) {
         leds[i] = ColorFromPalette( palettes[currentPaletteIndex], colorIndex, b, LINEARBLEND);

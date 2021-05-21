@@ -3,6 +3,7 @@
 
 #include "leaf/modes/HoneyOrangeMode.h"
 #include "leaf/modes/PaletteMode.h"
+#include "leaf/modes/FlowerMode.h"
 
 CLeafLEDManager::CLeafLEDManager(CRGB *leds, uint16_t size, float brightness)
 : CLEDManager(size, brightness) {
@@ -11,6 +12,10 @@ CLeafLEDManager::CLeafLEDManager(CRGB *leds, uint16_t size, float brightness)
 
     tMillis = tMillsChangePalette = millis();
     currentMode = 0;
+
+#ifdef LED_EXTERNAL_LEAFS
+    //modes.push_back(new CFlowerMode(LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_LEAF_SIZE));
+#endif
 
     modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, PartyColors_p, 1));
     modes.push_back(new CHoneyOrangeMode(LED_EXTERNAL_STRIP_SIZE));
