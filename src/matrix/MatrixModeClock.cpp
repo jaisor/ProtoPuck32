@@ -74,23 +74,16 @@ void CMatrixModeClock::draw(CRGB *leds) {
         canvas->fillScreen(0);
         //canvas->drawCircle(11, 11, 10, 0xffff);
 
-        /*
-        m++;
-        if (m>59) {
-            m = 0;
-            h++; 
-            if (h>11) {
-                h = 0;
-            }
-        }
-        */
-
         if (!timeUpdated) {
             return;
         }
 
         h = timeinfo.tm_hour;
         m = timeinfo.tm_min;
+
+        if (h > 12) {
+            h = h - 12;
+        }
 
         uint16_t x, y;
         double rad;
@@ -110,8 +103,6 @@ void CMatrixModeClock::draw(CRGB *leds) {
         canvas->setCursor(3, 18);
         canvas->printf("%02i:%02i", h, m);
         
-        //log_d("Min: %i, rad: %f, x: %i, y: %i", m, rad, x, y);
-
         drawCanvas(leds);
     }
     
