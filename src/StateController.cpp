@@ -35,7 +35,7 @@ CStateController::CStateController(CDevice *device)
 #endif
 
 #ifdef LED
-    managers.push_back(new CInternalLEDManager(LED_STRIP_SIZE, configuration.ledBrightness));
+    managers.push_back(new CInternalLEDManager(LED_STRIP_SIZE, configuration.ledBrightnessTime));
     #ifdef LED_EXTERNAL_MATRIX
         managers.push_back(new CMatrixLEDManager(device->ledsExternal(), LED_EXTERNAL_MATRIX_WIDTH, LED_EXTERNAL_MATRIX_HEIGHT, LED_EXTERNAL_BRIGHTNESS)); 
     #else

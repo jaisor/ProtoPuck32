@@ -29,9 +29,9 @@ void CMatrixModePicture::draw(CRGB *leds) {
             uint8_t r, g, b;
             uint16_t bi = index * pixels * BITMAP_BYTES_PER_PIXEL + (y * width + x) * BITMAP_BYTES_PER_PIXEL;
 
-            b = bitmap[bi] * configuration.ledBrightness;
-            g = bitmap[bi+1] * configuration.ledBrightness;
-            r = bitmap[bi+2] * configuration.ledBrightness;
+            b = bitmap[bi] * configuration.ledBrightnessTime;
+            g = bitmap[bi+1] * configuration.ledBrightnessTime;
+            r = bitmap[bi+2] * configuration.ledBrightnessTime;
 
             leds[ XY(x, y) ] = CRGB(r, g, b);           
         }

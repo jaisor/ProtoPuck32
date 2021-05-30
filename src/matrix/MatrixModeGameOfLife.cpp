@@ -61,9 +61,9 @@ void CMatrixModeGameOfLife::draw(CRGB *leds) {
         }
 
         for (uint16_t i=0; i<width * height; i++) {
-            leds[i].r = leds[i].r * configuration.ledBrightness; 
-            leds[i].g = leds[i].g * configuration.ledBrightness; 
-            leds[i].b = leds[i].b * configuration.ledBrightness; 
+            leds[i].r = leds[i].r * configuration.ledBrightnessTime; 
+            leds[i].g = leds[i].g * configuration.ledBrightnessTime; 
+            leds[i].b = leds[i].b * configuration.ledBrightnessTime; 
         }
     }
     

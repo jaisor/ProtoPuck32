@@ -128,6 +128,13 @@ void CDevice::loop() {
       filteredKeyStatus = maxKey;
   }
 
+  if (millis() - tMillisMin > 60000) {
+    tMillisMin = millis();
+    #ifdef LED
+      CONFIG_updateLedBrightnessTime();
+    #endif
+  }
+
 }
 
 

@@ -66,6 +66,7 @@ private:
     
     unsigned long tMillisTemp;
     unsigned long tMillisKey;
+    unsigned long tMillisMin;
 
 #ifdef LED
     CRGB _ledsInternal[LED_STRIP_SIZE];

@@ -20,9 +20,9 @@ void CMatrixModeFallingStars::draw(CRGB *leds) {
 
         for(uint8_t i=0; i<NUM_STARS; i++) {
             leds[XY(stars[i].x, stars[i].y)] = CRGB(
-                stars[i].color.r * configuration.ledBrightness * stars[i].v/5,
-                stars[i].color.g * configuration.ledBrightness * stars[i].v/5,
-                stars[i].color.b * configuration.ledBrightness * stars[i].v/5
+                stars[i].color.r * configuration.ledBrightnessTime * stars[i].v/5,
+                stars[i].color.g * configuration.ledBrightnessTime * stars[i].v/5,
+                stars[i].color.b * configuration.ledBrightnessTime * stars[i].v/5
             );
 
             stars[i].y += (float)(time * stars[i].v) / 100.0;

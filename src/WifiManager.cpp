@@ -177,6 +177,7 @@ void CWifiManager::listen() {
   //time()
   if(getLocalTime(&timeinfo)){
     log_i("%i:%i", timeinfo.tm_hour,timeinfo.tm_min);
+    CONFIG_updateLedBrightnessTime();
   }
 
   

@@ -58,9 +58,9 @@ void CMatrixModeFireworks::draw(CRGB *leds) {
                 uint8_t r, g, b;
                 uint16_t bi = (y * width + x) * BITMAP_BYTES_PER_PIXEL;
 
-                b = BITMAP[bi] * configuration.ledBrightness;
-                g = BITMAP[bi+1] * configuration.ledBrightness;
-                r = BITMAP[bi+2] * configuration.ledBrightness;
+                b = BITMAP[bi] * configuration.ledBrightnessTime;
+                g = BITMAP[bi+1] * configuration.ledBrightnessTime;
+                r = BITMAP[bi+2] * configuration.ledBrightnessTime;
 
                 leds[ XY(x, y) ] = CRGB(r, g, b);           
             }

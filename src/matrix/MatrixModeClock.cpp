@@ -63,9 +63,9 @@ void CMatrixModeClock::draw(CRGB *leds) {
                 uint8_t r, g, b;
                 uint16_t bi = (y * width + x) * BITMAP_BYTES_PER_PIXEL;
 
-                b = BITMAP_CLOCK_FACE[bi] * configuration.ledBrightness;
-                g = BITMAP_CLOCK_FACE[bi+1] * configuration.ledBrightness;
-                r = BITMAP_CLOCK_FACE[bi+2] * configuration.ledBrightness;
+                b = BITMAP_CLOCK_FACE[bi] * configuration.ledBrightnessTime;
+                g = BITMAP_CLOCK_FACE[bi+1] * configuration.ledBrightnessTime;
+                r = BITMAP_CLOCK_FACE[bi+2] * configuration.ledBrightnessTime;
 
                 leds[ XY(x, y) ] = CRGB(r, g, b);           
             }
