@@ -333,12 +333,12 @@ String CWifiManager::getTempSensorResponse() {
 void CWifiManager::handleLEDMatrix() {
   digitalWrite(BOARD_LED_PIN, LOW);
 
-  matrix_pixel_t pixels[LED_EXTERNAL_MATRIX_WIDTH * LED_EXTERNAL_MATRIX_HEIGHT];
+  //matrix_pixel_t pixels[LED_EXTERNAL_MATRIX_WIDTH * LED_EXTERNAL_MATRIX_HEIGHT];
 
   String postBody = server.arg("plain");
   log_d("LED Matrinx: %s", postBody.c_str());
 
-  ioTManager->setLeds(pixels);
+  //ioTManager->setLeds(pixels);
 
 /*
   const char pixelDelimiter[1] = ",";

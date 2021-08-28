@@ -1,10 +1,11 @@
 #ifndef _FIREWORK_H
 #define _FIREWORK_H
 
-#ifdef LED_EXTERNAL_MATRIX
-
 #include <Arduino.h>
 #include "Configuration.h"
+
+#ifdef LED_EXTERNAL_MATRIX
+
 #include "matrix/BaseMatrixMode.h"
 #ifdef LED
     #include <FastLED.h>
