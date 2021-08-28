@@ -14,7 +14,14 @@ CLeafLEDManager::CLeafLEDManager(CRGB *leds, uint16_t size, float brightness)
     currentMode = 0;
 
 #ifdef LED_EXTERNAL_LEAFS
-    //modes.push_back(new CFlowerMode(LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_LEAF_SIZE));
+    modes.push_back(new CFlowerMode(LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_LEAF_SIZE));
+        modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, PartyColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
+    modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, RainbowColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
+    modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, CloudColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
+    modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, ForestColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
+    modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, OceanColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
+    modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, HeatColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
+    modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, LavaColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
 #endif
 
     modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, PartyColors_p, 1));

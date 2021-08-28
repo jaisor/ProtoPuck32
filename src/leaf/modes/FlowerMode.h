@@ -11,7 +11,7 @@ private:
     const uint16_t nodeLength;
     const unsigned long delay;
 
-    void drawNode(CRGB *leds, const uint16_t (*n)[2], const TProgmemRGBPalette16& palette);
+    void drawNode(CRGB *leds, const uint16_t (*n)[2], const uint8_t node_size, const TProgmemRGBPalette16& palette);
 
 public:
     CFlowerMode(const uint16_t numLeds, const uint16_t nodeLength);

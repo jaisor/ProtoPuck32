@@ -304,7 +304,9 @@ void CWifiManager::handleConnect() {
   EEPROM_saveConfig();
 
   strcpy(SSID, configuration.wifiSsid);
-  connect();
+  //connect();
+
+  ESP.restart();
 
   digitalWrite(BOARD_LED_PIN, HIGH);
   

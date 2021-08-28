@@ -81,16 +81,14 @@ void CFlowerMode::loop() {
 void CFlowerMode::draw(CRGB *leds) {
     memset(leds, 0, numLeds * sizeof(CRGB));
     
-    drawNode(leds, nodes_Leaf, FlowerLeaf_p);
-    //drawNode(leds, nodes_Stem, FlowerStem_p);
-    //drawNode(leds, nodes_Petals, FlowerPetals_p);
+    drawNode(leds, nodes_Leaf, 1, FlowerLeaf_p);
+    drawNode(leds, nodes_Stem, 2, FlowerStem_p);
+    drawNode(leds, nodes_Petals, 1, FlowerPetals_p);
 }
 
-void CFlowerMode::drawNode(CRGB *leds, const uint16_t (*n)[2], const TProgmemRGBPalette16& palette) {
+void CFlowerMode::drawNode(CRGB *leds, const uint16_t (*n)[2], const uint8_t node_size, const TProgmemRGBPalette16& palette) {
     uint8_t ci = startIndex;
-    //log_d("Node size %i , div %i", sizeof(n), sizeof(n) / (sizeof(uint16_t)*2));
-    for (uint16_t l = 0; l < sizeof(n) / (sizeof(uint16_t)*2); l++) {
-        //log_d("Node %i : %i - %i", l, n[l][0], n[l][1]);
+    for (uint16_t l = 0; l < node_size; l++) {
         for( int i = n[l][0]; i < n[l][1]; i++) {
             leds[i] = ColorFromPalette( palette, ci, 255 * configuration.ledBrightness, LINEARBLEND);
             ci++;
