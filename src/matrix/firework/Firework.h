@@ -3,6 +3,9 @@
 
 #include <Arduino.h>
 #include "Configuration.h"
+
+#ifdef LED_EXTERNAL_MATRIX
+
 #include "matrix/BaseMatrixMode.h"
 #ifdef LED
     #include <FastLED.h>
@@ -23,5 +26,7 @@ public:
     void reset();
     virtual void draw(CRGB *leds);
 };
+
+#endif
 
 #endif

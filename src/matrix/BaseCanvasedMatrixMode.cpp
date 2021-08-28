@@ -3,6 +3,7 @@
 #include <Fonts/Picopixel.h>
 #include "BaseCanvasedMatrixMode.h"
 
+#ifdef LED_EXTERNAL_MATRIX
 
 CBaseCanvasedMatrixMode::CBaseCanvasedMatrixMode(const uint8_t width, const uint8_t height)
 : CBaseMatrixMode(width, height) {
@@ -107,3 +108,5 @@ void CBaseCanvasedMatrixMode::drawThickLine(int16_t x0, int16_t y0, int16_t x1, 
         }
     }
 }
+
+#endif

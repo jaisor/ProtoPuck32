@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "Firework.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 CFirework::CFirework(const uint8_t width, const uint8_t height)
 : CBaseMatrixMode(width, height) {
     reset();
@@ -66,8 +68,6 @@ void CFirework::draw(CRGB *leds) {
         }
     }
 
-
-
-    
-
 }
+
+#endif

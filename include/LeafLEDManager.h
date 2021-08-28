@@ -7,7 +7,9 @@
     #include <FastLED.h>
 #endif
 
-class CDemoLEDManager: public CLEDManager {
+#include "leaf/modes/BaseMode.h"
+
+class CLeafLEDManager: public CLEDManager {
 
 private:
     unsigned long tMillis, tMillsChangePalette;
@@ -15,15 +17,11 @@ private:
 
     CRGB *leds;
 
-    std::vector<CRGBPalette16> palettes;
-    uint8_t currentPaletteIndex;
-    uint8_t changePalette;
-
-    void ChangePalettePeriodically();
-    void FillLEDsFromPaletteColors(CRGB *leds, uint8_t colorIndex);
+    std::vector<CBaseMode*> modes;
+    uint8_t currentMode;
 
 public:
-	CDemoLEDManager(CRGB *leds, uint16_t size, float brightness);
+	CLeafLEDManager(CRGB *leds, uint16_t size, float brightness);
 
 #ifdef LED
     virtual uint16_t LED_Status(CRGB *leds);

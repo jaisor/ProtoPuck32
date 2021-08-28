@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "MatrixModeRGBDemo.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 CMatrixModeRGBDemo::CMatrixModeRGBDemo(uint8_t width, uint8_t height)
 : CBaseMatrixMode(width, height) {
 }
@@ -54,3 +56,4 @@ void CMatrixModeRGBDemo::draw(CRGB *leds) {
         */
         
 
+#endif

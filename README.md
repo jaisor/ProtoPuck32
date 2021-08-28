@@ -31,6 +31,24 @@ Replacing `libdeps/LittleFS_esp32` with downliad from [LittleFS_esp32](https://w
 
 ## Builds
 
+### LED Node Leaf
+
+![LED displaying heart](/pics/leafnodes.jpg)
+
+Solder the DI/Signal wire (usually middle of the strip) to pin 13, otherwise change the `LED_PIN` in `Configuration.h`
+
+## Bill of materials (BOM)
+
+In addition to the base driver above:
+* [WS2812B RGB LED Strip Light](https://www.amazon.com/gp/product/B08B59CBK9/)
+* [RGBZONE 20Pairs JST SM 3PIN Plugs](https://www.amazon.com/gp/product/B075K4HLTQ/)
+
+Case - 3D printed, STL files:
+
+* [LED diffuser](case/NodeLeaf/LEDNodeLeafDiffuser.stl)
+* [LED frame](case/NodeLeaf/LEDNodeLeafBase.stl)
+
+
 ### LED Matrix
 
 ![LED displaying heart](/pics/heart.jpg)

@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "BaseMatrixMode.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 CBaseMatrixMode::CBaseMatrixMode(uint8_t width, uint8_t height):
 width(width), height(height) {
     tMillis = millis();
@@ -45,3 +47,5 @@ uint16_t CBaseMatrixMode::XYsafe( uint8_t x, uint8_t y) {
   if( y >= height) return -1;
   return XY(x,y);
 }
+
+#endif

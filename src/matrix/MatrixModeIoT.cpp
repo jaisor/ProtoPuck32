@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "MatrixModeIoT.h"
 
+#ifdef LED_EXTERNAL_MATRIX
 
 CMatrixModeIoT::CMatrixModeIoT(uint8_t width, uint8_t height)
 : CBaseMatrixMode(width, height) {
@@ -30,4 +31,4 @@ void CMatrixModeIoT::keyEvent(key_status_t key) {
 }
 #endif
 
-
+#endif

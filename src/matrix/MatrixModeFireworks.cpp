@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "MatrixModeFireworks.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 #define NUM_FIREWORKS 5
 #define BITMAP_BYTES_PER_PIXEL 4
 #define HAND_COLOR_MIN 0x5fff
@@ -92,4 +94,4 @@ void CMatrixModeFireworks::keyEvent(key_status_t key) {
 }
 #endif
 
-
+#endif

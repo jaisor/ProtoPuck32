@@ -161,7 +161,7 @@ void CWifiManager::listen() {
   // Web
   server.on("/", std::bind(&CWifiManager::handleRoot, this));
   server.on("/connect", HTTP_POST, std::bind(&CWifiManager::handleConnect, this));
-  server.on("/led/external/matrix", HTTP_POST, std::bind(&CWifiManager::handleLEDMatrix, this));
+  //server.on("/led/external/matrix", HTTP_POST, std::bind(&CWifiManager::handleLEDMatrix, this));
   server.begin(WEB_SERVER_PORT);
   log_d("Web server listening on port %i", WEB_SERVER_PORT);
   
@@ -305,7 +305,9 @@ void CWifiManager::handleConnect() {
   EEPROM_saveConfig();
 
   strcpy(SSID, configuration.wifiSsid);
-  connect();
+  //connect();
+
+  ESP.restart();
 
   digitalWrite(BOARD_LED_PIN, HIGH);
   
@@ -332,12 +334,12 @@ String CWifiManager::getTempSensorResponse() {
 void CWifiManager::handleLEDMatrix() {
   digitalWrite(BOARD_LED_PIN, LOW);
 
-  matrix_pixel_t pixels[LED_EXTERNAL_MATRIX_WIDTH * LED_EXTERNAL_MATRIX_HEIGHT];
+  //matrix_pixel_t pixels[LED_EXTERNAL_MATRIX_WIDTH * LED_EXTERNAL_MATRIX_HEIGHT];
 
   String postBody = server.arg("plain");
   log_d("LED Matrinx: %s", postBody.c_str());
 
-  ioTManager->setLeds(pixels);
+  //ioTManager->setLeds(pixels);
 
 /*
   const char pixelDelimiter[1] = ",";

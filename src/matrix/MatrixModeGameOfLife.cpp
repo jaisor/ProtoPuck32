@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "MatrixModeGameOfLife.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 CMatrixModeGameOfLife::CMatrixModeGameOfLife(const uint8_t width, const uint8_t height)
 : CBaseMatrixMode(width, height), size(width * height) {
 
@@ -140,3 +142,5 @@ CRGB CMatrixModeGameOfLife::getDead(const uint8_t x, const uint8_t y) {
 
     return CRGB(dead.r / (n + 1), dead.g / (n + 1), dead.b / (n + 1));
 }
+
+#endif

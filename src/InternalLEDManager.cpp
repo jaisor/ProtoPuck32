@@ -11,6 +11,8 @@ CInternalLEDManager::CInternalLEDManager(uint16_t size, float brightness)
     CRGB green  = CHSV( HUE_GREEN, 255, 255);
     CRGB black  = CRGB::Black;
 
+    palettes.push_back(PartyColors_p);
+    
     palettes.push_back(
         CRGBPalette16(
             green,  green,  black,  black,
@@ -23,7 +25,6 @@ CInternalLEDManager::CInternalLEDManager(uint16_t size, float brightness)
     palettes.push_back(RainbowStripeColors_p);
     palettes.push_back(RainbowStripeColors_p);
     palettes.push_back(CloudColors_p);
-    palettes.push_back(PartyColors_p);
     palettes.push_back(LavaColors_p);
     palettes.push_back(OceanColors_p);
     palettes.push_back(ForestColors_p);
@@ -34,7 +35,7 @@ CInternalLEDManager::CInternalLEDManager(uint16_t size, float brightness)
 uint16_t CInternalLEDManager::LED_Status(CRGB *leds) {
 
     uint8_t colorIndex = startIndex;
-    uint8_t b = brightness * brightness * 255;
+    uint8_t b = brightness * 255;
     
     for( int i = 0; i < size; i++) {
         leds[i] = ColorFromPalette( palettes[currentPaletteIndex], colorIndex, b, LINEARBLEND);

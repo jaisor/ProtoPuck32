@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "MatrixModePicture.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 #define BITMAP_BYTES_PER_PIXEL 4
 
 CMatrixModePicture::CMatrixModePicture(uint8_t width, uint8_t height, const uint8_t *bitmap, const uint8_t numBitmaps)
@@ -78,4 +80,4 @@ void CMatrixModePicture::keyEvent(key_status_t key) {
 }
 #endif
 
-
+#endif

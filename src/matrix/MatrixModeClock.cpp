@@ -3,6 +3,8 @@
 #include <Fonts/Picopixel.h>
 #include "MatrixModeClock.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 #define BITMAP_BYTES_PER_PIXEL 4
 #define HAND_COLOR_MIN 0x5fff
 #define HAND_COLOR_HOUR 0xfd00
@@ -123,4 +125,4 @@ void CMatrixModeClock::keyEvent(key_status_t key) {
 }
 #endif
 
-
+#endif

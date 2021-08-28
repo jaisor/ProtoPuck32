@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "MatrixModeFallingStars.h"
 
+#ifdef LED_EXTERNAL_MATRIX
+
 CMatrixModeFallingStars::CMatrixModeFallingStars(const uint8_t width, const uint8_t height)
 : CBaseMatrixMode(width, height) {
 
@@ -55,3 +57,5 @@ void CMatrixModeFallingStars::randomize() {
     }
 
 }
+
+#endif

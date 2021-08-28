@@ -5,7 +5,7 @@
 #include <WebServer.h>
 #include <PubSubClient.h>
 #include "BaseManager.h"
-#include "matrix/MatrixModeIoT.h"
+//#include "matrix/MatrixModeIoT.h"
 
 typedef enum {
     WF_CONNECTING = 0,
@@ -22,7 +22,7 @@ private:
 
     WebServer server;
     PubSubClient client;
-    CMatrixModeIoT *ioTManager;
+    //CMatrixModeIoT *ioTManager;
 
     void connect();
     void listen();
@@ -43,7 +43,7 @@ public:
 #endif
     virtual void loop();
 
-    void setIoTManager(CMatrixModeIoT *ioTManager);
+    //void setIoTManager(CMatrixModeIoT *ioTManager);
 
 };
 
