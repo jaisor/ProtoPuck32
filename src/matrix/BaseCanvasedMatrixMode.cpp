@@ -32,7 +32,7 @@ CRGB CBaseCanvasedMatrixMode::RGB565_to_CRGB(uint16_t color) {
 }
 
 uint16_t CBaseCanvasedMatrixMode::CRGB_to_RGB565(CRGB c) {
-    return  ((int(c.r / 255 * 31) << 11) | (int(c.g / 255 * 63) << 5) | (int(c.b / 255 * 31)));
+    return (uint16_t) (((c.r >> 3) & 0x1f) << 11 | ((c.g >> 2) & 0x3f) << 5 | (c.b >> 3) & 0x1f);
 }
 
 void CBaseCanvasedMatrixMode::drawCanvas(CRGB *leds) {
