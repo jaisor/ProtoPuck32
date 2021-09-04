@@ -12,6 +12,11 @@ class CMatrixModeSoundLevel : public CBaseCanvasedMatrixMode {
 
 private:
 
+    uint32_t Leq_samples = 0;
+    double Leq_sum_sqr = 0;
+    double Leq_dB = 0;
+    uint8_t led_level_step;
+
 public:
 	CMatrixModeSoundLevel(uint8_t width, uint8_t height);
     virtual void draw(CRGB *leds);
