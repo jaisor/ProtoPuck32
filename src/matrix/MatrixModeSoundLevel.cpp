@@ -10,7 +10,7 @@
 #include <driver/i2s.h>
 #include "sos-iir-filter.h"
 
-// Heavily based on code from https://github.com/ikostoski/esp32-i2s-slm/blob/master/esp32-i2s-slm.ino
+// Sound level code heavily based on https://github.com/ikostoski/esp32-i2s-slm/blob/master/esp32-i2s-slm.ino
 
 #define LEQ_PERIOD        1           // second(s)
 #define WEIGHTING         C_weighting // Also avaliable: 'C_weighting' or 'None' (Z_weighting)
@@ -285,12 +285,13 @@ void mic_i2s_reader_task(void* parameter) {
 
 #define SOUND_LEVEL_MIN 60
 #define SOUND_LEVEL_MAX 100
+#define DB_HISTORY_INTERVAL_MS 3000
 
 DEFINE_GRADIENT_PALETTE( GreenYellowRed_gp ) {
     0, 0x00, 0xff, 0x00,
   100, 0x00, 0xff, 0x00,
-  160, 0xff, 0xff, 0x00,
-  210, 0xff, 0x00, 0x00,
+  150, 0xff, 0xff, 0x00,
+  200, 0xff, 0x00, 0x00,
   255, 0xff, 0x00, 0x00
 };
 
@@ -309,7 +310,15 @@ CMatrixModeSoundLevel::CMatrixModeSoundLevel(uint8_t width, uint8_t height)
     //       For manual control see: xTaskCreatePinnedToCore
     xTaskCreate(mic_i2s_reader_task, "Mic I2S Reader", I2S_TASK_STACK, NULL, I2S_TASK_PRI, NULL);
 
-    led_level_step = (SOUND_LEVEL_MAX - SOUND_LEVEL_MIN) / width;
+    ledWStep = (SOUND_LEVEL_MAX - SOUND_LEVEL_MIN) / ((float)width);
+    ledHStep = (SOUND_LEVEL_MAX - SOUND_LEVEL_MIN) / 11.0f;
+    log_d("LED Step: w=%.2f, h=%.2f", ledWStep, ledHStep);
+
+    tMillisHistory = 0;
+    dbRunningAvg = SOUND_LEVEL_MIN;
+    dbRunningMax = SOUND_LEVEL_MIN;
+    dbRunningSum = SOUND_LEVEL_MIN;
+    dbRunningCount = 1;
 
     canvas->setTextColor(0xffff);
     canvas->setTextSize(1);
@@ -345,27 +354,36 @@ void CMatrixModeSoundLevel::draw(CRGB *leds) {
             
             // Debug only
             //log_d("%u processing ticks\n", q.proc_ticks);
+
+            if (dbRunningMax < Leq_dB) {
+                dbRunningMax = Leq_dB;
+            }
         }
     }
-    
 
-    if (millis() - tMillis > 20) {
+    if (millis() - tMillisHistory > DB_HISTORY_INTERVAL_MS) {
+        tMillisHistory = millis();
+        dbRunningAvg = dbRunningSum / (float)dbRunningCount;
+        log_d("Avg %.2f over %i samples, history length %i", dbRunningAvg, dbRunningCount, dbHistory.size());
+        dbHistory.push_back(dbRunningMax);
+        if (dbHistory.size() > width) {
+            dbHistory.erase(dbHistory.begin());
+        }
+        dbRunningSum = SOUND_LEVEL_MIN;
+        dbRunningMax = SOUND_LEVEL_MIN;
+        dbRunningCount = 1;
+    }
+    
+    if (millis() - tMillis > 500) {
         tMillis = millis();
 
         memset(leds, 0, width * height * sizeof(CRGB));
         canvas->fillScreen(0);
         
+        dbRunningSum += Leq_dB;
+        dbRunningCount++;
+
         uint8_t dba = (uint8_t)Leq_dB;
-
-        uint8_t ledDba = dba - SOUND_LEVEL_MIN;
-        if (dba < SOUND_LEVEL_MIN) { dba = SOUND_LEVEL_MIN; }
-        if (dba > SOUND_LEVEL_MAX) { dba = SOUND_LEVEL_MAX; }
-
-        for (uint8_t i=0; i<ledDba / led_level_step; i++) {
-            CRGB c = ColorFromPalette(GreenYellowRed_p, (i * led_level_step + SOUND_LEVEL_MIN) * 2, 255 * configuration.ledBrightness, NOBLEND);
-            leds[ XYsafe(i, 13) ]  = c;
-            leds[ XYsafe(i, 21) ]  = c;
-        }
 
         canvas->setCursor(3, 20);
         canvas->setTextColor(CRGB_to_RGB565(ColorFromPalette(GreenYellowRed_p, dba * 2, 255 * configuration.ledBrightness, NOBLEND)));
@@ -377,12 +395,35 @@ void CMatrixModeSoundLevel::draw(CRGB *leds) {
         canvas->setFont(&Picopixel);
         canvas->printf("dB");
 
-        dba += 1;
-        if (dba >= 127) {
-            dba = 0;
+        drawCanvas(leds);
+
+        CRGB c = CRGB(50 * configuration.ledBrightness, 50 * configuration.ledBrightness, 50 * configuration.ledBrightness);
+        for (uint8_t x=0; x<22; x++) {
+            leds[ XYsafe(x, 12) ]  = c;
         }
 
-        drawCanvas(leds);
+        // Draw bars
+        if (dba < SOUND_LEVEL_MIN) { dba = SOUND_LEVEL_MIN; }
+        if (dba > SOUND_LEVEL_MAX) { dba = SOUND_LEVEL_MAX; }
+        for (uint8_t i=SOUND_LEVEL_MIN; i<dba; i++) {
+            CRGB c = ColorFromPalette(GreenYellowRed_p, i * 2, 255 * configuration.ledBrightness, NOBLEND);
+            uint8_t x = (i - SOUND_LEVEL_MIN) / ledWStep;
+            leds[ XYsafe(x, 13) ]  = c;
+            leds[ XYsafe(x, 21) ]  = c;
+        }
+
+        // Draw history
+        uint8_t x=0;
+        for(float hdb : dbHistory) {
+            if (hdb < SOUND_LEVEL_MIN) { hdb = SOUND_LEVEL_MIN; }
+            if (hdb > SOUND_LEVEL_MAX) { hdb = SOUND_LEVEL_MAX; } 
+
+            CRGB c = ColorFromPalette(GreenYellowRed_p, hdb * 2, 255 * configuration.ledBrightness, NOBLEND);
+            uint8_t y = (hdb - SOUND_LEVEL_MIN) / ledHStep;
+
+            leds[ XYsafe(x++, 11-y) ] = c;
+        }
+        
     }
     
 }
