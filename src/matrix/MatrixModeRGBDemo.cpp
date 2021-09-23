@@ -25,7 +25,7 @@ void CMatrixModeRGBDemo::draw(CRGB *leds) {
             byte pixelHue = lineStartHue;      
             for( byte x = 0; x < width; x++) {
                 pixelHue += xHueDelta8;
-                leds[ XY(x, y) ]  = CHSV( pixelHue, 255, configuration.ledBrightness * 255);
+                leds[ XY(x, y) ]  = CHSV( pixelHue, 255, configuration.ledBrightnessTime * 255);
             }
         }
     }

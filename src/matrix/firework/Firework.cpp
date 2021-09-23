@@ -29,9 +29,9 @@ void CFirework::reset() {
 void CFirework::draw(CRGB *leds) {
 
     CRGB c = CRGB(
-        color.r * configuration.ledBrightness, 
-        color.g * configuration.ledBrightness, 
-        color.b * configuration.ledBrightness
+        color.r * configuration.ledBrightnessTime, 
+        color.g * configuration.ledBrightnessTime, 
+        color.b * configuration.ledBrightnessTime
     );
 
     if (state == 0) {

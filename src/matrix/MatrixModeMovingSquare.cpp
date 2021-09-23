@@ -38,7 +38,7 @@ void CMatrixModeMovingSquare::draw(CRGB *leds) {
 
         uint8_t xi = xf * width;
         uint8_t yi = yf * height;
-        uint8_t b = configuration.ledBrightness * 255;
+        uint8_t b = configuration.ledBrightnessTime * 255;
 
         //leds[ XYsafe(xi, yi) ]  = CHSV( 255, 0, b);
         leds[ XYsafe(xi-1, yi) ]  = CHSV( 255, 0, b);

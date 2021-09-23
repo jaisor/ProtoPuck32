@@ -50,6 +50,7 @@ void EEPROM_loadConfig() {
   strcpy(configuration.ntpServer, NTP_SERVER);
   configuration.gmtOffset_sec = NTP_GMT_OFFSET_SEC;
   configuration.daylightOffset_sec = NTP_DAYLIGHT_OFFSET_SEC;
+  configuration.ledBrightnessTime = configuration.ledBrightness;
 
 }
 
@@ -59,3 +60,21 @@ void EEPROM_wipe() {
     EEPROM.write(i, 0);
   }
 }
+
+#ifdef LED
+void CONFIG_updateLedBrightnessTime() {
+  struct tm timeinfo;
+  bool timeUpdated = getLocalTime(&timeinfo);
+  if (timeUpdated) {
+    
+    float dimmer = 1;
+    if (timeinfo.tm_hour >= 20 && timeinfo.tm_hour < 21) {
+      dimmer = 0.2;
+    } else if (timeinfo.tm_hour >= 21 || timeinfo.tm_hour < 7) {
+      dimmer = 0;
+    }
+
+    configuration.ledBrightnessTime = configuration.ledBrightness * dimmer;
+  }
+}
+#endif

@@ -28,7 +28,7 @@ CRGB CBaseCanvasedMatrixMode::RGB565_to_CRGB(uint16_t color) {
     g = ((((color >> 5) & 0x3F) * 259) + 33) >> 6;
     b = (((color & 0x1F) * 527) + 23) >> 6;
 
-    return CRGB(r * configuration.ledBrightness, g * configuration.ledBrightness, b * configuration.ledBrightness);
+    return CRGB(r * configuration.ledBrightnessTime, g * configuration.ledBrightnessTime, b * configuration.ledBrightnessTime);
 }
 
 uint16_t CBaseCanvasedMatrixMode::CRGB_to_RGB565(CRGB c) {

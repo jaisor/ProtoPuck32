@@ -99,6 +99,7 @@ struct configuration_t {
 
     #ifdef LED
         float ledBrightness;
+        float ledBrightnessTime;
     #endif
 };
 
@@ -107,5 +108,9 @@ extern configuration_t configuration;
 void EEPROM_saveConfig();
 void EEPROM_loadConfig();
 void EEPROM_wipe();
+
+#ifdef LED
+    void CONFIG_updateLedBrightnessTime();
+#endif
 
 #endif
