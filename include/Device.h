@@ -18,17 +18,15 @@
     #include <Adafruit_BME280.h>
 #endif
 
-#ifdef KEYPAD
-    typedef enum {
-        KEY_NONE = 0,
-        KEY_UP,
-        KEY_DOWN,
-        KEY_LEFT,
-        KEY_RIGHT,
-        KEY_MIDDLE,
-        NUM_KEYS
-    } key_status_t;
-#endif
+typedef enum {
+    KEY_NONE = 0,
+    KEY_UP,
+    KEY_DOWN,
+    KEY_LEFT,
+    KEY_RIGHT,
+    KEY_MIDDLE,
+    NUM_KEYS
+} key_status_t;
 
 class CDevice {
 
@@ -58,9 +56,10 @@ public:
     Adafruit_SSD1306* display() const { return _display; };
 #endif
 
+#ifdef KEYPAD
     key_status_t keyStatus() const { return _keyStatus; };
-
     void addKeyListener(TKeyListener listener);
+#endif
 
 private:
     

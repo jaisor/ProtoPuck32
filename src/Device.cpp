@@ -70,6 +70,8 @@ CDevice::~CDevice() {
 
 void CDevice::loop() {
 
+  #ifdef KEYPAD
+
   // Scan keypad
   uint16_t k = analogRead(KEYPAD_PIN);
 
@@ -130,6 +132,8 @@ void CDevice::loop() {
       filteredKeyStatus = maxKey;
   }
 
+  #endif
+
   if (millis() - tMillisMin > 60000) {
     tMillisMin = millis();
     #ifdef LED
@@ -139,7 +143,7 @@ void CDevice::loop() {
 
 }
 
-
+#ifdef KEYPAD
 void CDevice::addKeyListener(TKeyListener listener) {
 
     listener_t *l = new listener_t { listener, nullptr }; 
@@ -163,3 +167,4 @@ void CDevice::addKeyListener(TKeyListener listener) {
     }
    
 }
+#endif

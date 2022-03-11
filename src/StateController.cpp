@@ -67,7 +67,10 @@ void CStateController::loop() {
     if (millis() - tMillis > 100) {
         
         tMillis = millis();
+
+        #ifdef OLED
         device->display()->clearDisplay();
+        #endif
 
         switch (state) {
             case S_HOME_SCREEN: drawStateHome(); break;
@@ -76,11 +79,13 @@ void CStateController::loop() {
             default: ;
         }
         
-    #ifdef LED
-        FastLED.show();
-    #endif
-    
+        #ifdef OLED
         device->display()->display();
+        #endif
+
+        #ifdef LED
+        FastLED.show();
+        #endif
     }  
 
     switch (state) {
@@ -111,8 +116,12 @@ void CStateController::drawStateHome() {
     display->setTextSize(1);
     display->setCursor(70, 24);
     display->print("K:");
-    display->print(String(analogRead(KEYPAD_PIN)));
-    display->drawBitmap(116, 24, _key_bitmaps[device->keyStatus()], 8, 8, 1);
+    #ifdef KEYPAD
+        display->print(String(analogRead(KEYPAD_PIN)));
+        display->drawBitmap(116, 24, _key_bitmaps[device->keyStatus()], 8, 8, 1);
+    #else
+        display->print("n/a");
+    #endif
 
     // FIXME
     // display temperature
