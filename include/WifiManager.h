@@ -23,6 +23,7 @@ private:
     WebServer server;
     PubSubClient client;
     //CMatrixModeIoT *ioTManager;
+    CDevice * const device;
 
     void connect();
     void listen();
@@ -37,7 +38,7 @@ private:
 #endif
     
 public:
-	CWifiManager();
+	CWifiManager(CDevice * const device);
 #ifdef OLED
     virtual uint16_t OLED_Status(Adafruit_GFX *oled);
 #endif

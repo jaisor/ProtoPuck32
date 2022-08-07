@@ -14,7 +14,7 @@ typedef enum {
 class CStateController: public CBaseManager {
     
 public:
-	CStateController(CDevice *d);
+	CStateController(CDevice * const d);
     void loop();
 
 #ifdef KEYPAD
@@ -27,7 +27,7 @@ private:
     
     std::vector<CBaseManager*> managers;
     CBaseManager *configManager;
-    CDevice *device;
+    CDevice * const device;
 
     state_t state;
 

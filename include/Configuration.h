@@ -12,7 +12,6 @@
 #define ALEX_GIFT   // Temp, since the keyboard is flipped. TODO: implement key mapping sequence.
 
 #define BOOT_BUTTON 0
-#define EEPROM_CONFIGURATION_START 0    // First EEPROM byte to be used for storing the configuration
 
 #ifdef WIFI
     #define WIFI_SSID "ProtoPuck32"
@@ -85,25 +84,42 @@
     #define BME_I2C_ID  0x76
 #endif
 
-struct configuration_t {
+#define EEPROM_FACTORY_RESET 0           // Byte to be used for factory reset device fails to start or is rebooted within 1 sec 3 consequitive times
+#define EEPROM_CONFIGURATION_START 1     // First EEPROM byte to be used for storing the configuration
 
-    bool _loaded; // used to check if EEPROM was empty, should be true
+#define FACTORY_RESET_CLEAR_TIMER_MS 3000   // Clear factory reset counter when elapsed, considered smooth boot
+
+#define DEVICE_NAME "PP32"
+
+struct configuration_t {
 
     #ifdef WIFI
         char wifiSsid[32];
         char wifiPassword[63];
+
         char ntpServer[128];
         long gmtOffset_sec = 0;
         int daylightOffset_sec = 3600;
+
+        char mqttServer[128];
+        int mqttPort;
+        char mqttTopic[64];
     #endif
 
     #ifdef LED
         float ledBrightness;
         float ledBrightnessTime;
     #endif
+
+    char name[128];
+
+    char _loaded[7]; // used to check if EEPROM was correctly set
 };
 
 extern configuration_t configuration;
+
+uint8_t EEPROM_initAndCheckFactoryReset();
+void EEPROM_clearFactoryReset();
 
 void EEPROM_saveConfig();
 void EEPROM_loadConfig();

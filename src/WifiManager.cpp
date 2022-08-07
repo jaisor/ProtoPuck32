@@ -39,6 +39,55 @@ const unsigned char icon_ip [] PROGMEM = {
 	0x0, 0xee, 0x49, 0x49, 0x4e, 0x48, 0xe8, 0x0
 };
 
+const String htmlTop FL_PROGMEM = "<html>\
+  <head>\
+    <title>%s</title>\
+    <style>\
+      body { background-color: #303030; font-family: 'Anaheim',sans-serif; Color: #d8d8d8; }\
+    </style>\
+  </head>\
+  <body>\
+    <h1>%s ProtoPuck32</h1>";
+
+const String htmlBottom FL_PROGMEM = "<br><br><hr>\
+  <p>Uptime: %02d:%02d:%02d | Device: %s</p>\
+  </body>\
+</html>";
+
+const String htmlWifiApConnectForm FL_PROGMEM = "<h2>Connect to WiFi Access Point (AP)</h2>\
+    <form method='POST' action='/connect' enctype='application/x-www-form-urlencoded'>\
+      <label for='ssid'>SSID (AP Name):</label><br>\
+      <input type='text' id='ssid' name='ssid'><br><br>\
+      <label for='pass'>Password (WPA2):</label><br>\
+      <input type='password' id='pass' name='password' minlength='8' autocomplete='off' required><br><br>\
+      <input type='submit' value='Connect...'>\
+    </form>";
+
+const String htmlLEDModes FL_PROGMEM = "<hr><h2>LED Mode Selector</h2>\
+    <form method='POST' action='/led_mode' enctype='application/x-www-form-urlencoded'>\
+      <label for='ssid'>Device name:</label><br>\
+      <input type='text' id='deviceName' name='deviceName' value='%s'><br>\
+      <br>\
+      <label for='frame_delay'>LED strip length:</label><br>\
+      <input type='text' id='led_strip_size' name='led_strip_size' value='%i'> LEDs<br>\
+      <br>\
+      <label for='led_mode'>LED Mode:</label><br>\
+      <select name='led_mode' id='led_mode'>\
+      %s\
+      </select><br>\
+      <br>\
+      <label for='brightness'>Brightness:</label><br>\
+      <input type='text' id='brightness' name='brightness' value='%.2f'> range 0.0-1.0<br>\
+      <br>\
+      <label for='frame_delay'>Frame delay:</label><br>\
+      <input type='text' id='frame_delay' name='frame_delay' value='%i'> milliseconds<br>\
+      <br>\
+      <label for='cycle_delay'>Auto cycle modes every:</label><br>\
+      <input type='text' id='cycle_delay' name='cycle_delay' value='%i'> seconds (0-stay on current mode)<br>\
+      <br>\
+      <input type='submit' value='Set...'>\
+    </form>";
+
 void handle_mqtt_message(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -59,7 +108,8 @@ void handle_mqtt_message(char* topic, byte* payload, unsigned int length) {
   */
 }
 
-CWifiManager::CWifiManager() {    
+CWifiManager::CWifiManager(CDevice * const device)
+:device(device) {    
   pinMode(BOARD_LED_PIN,OUTPUT);
   this->client.setClient(espClient);
   strcpy(SSID, configuration.wifiSsid);
@@ -169,6 +219,20 @@ void CWifiManager::listen() {
   client.setServer("192.168.10.10", 1883);
   client.setCallback(handle_mqtt_message);
 
+  if (!client.connected()) {
+    log_d("Attempting MQTT connection...");
+    // Attempt to connect
+    if (client.connect("arduinoClient")) {
+      log_i("MQTT connected");
+      // Once connected, publish an announcement...
+      client.publish("outTopic","hello world");
+      // ... and resubscribe
+      //client.subscribe("inTopic");
+    } else {
+      log_d("MQTT connect failed, rc=%i", client.state());
+    }
+  }
+
   // NTP
   log_i("Configuring time from %s at %i (%i)", configuration.ntpServer, configuration.gmtOffset_sec, configuration.daylightOffset_sec);
 
@@ -179,7 +243,6 @@ void CWifiManager::listen() {
     log_i("%i:%i", timeinfo.tm_hour,timeinfo.tm_min);
     CONFIG_updateLedBrightnessTime();
   }
-
   
 }
 
@@ -315,10 +378,11 @@ void CWifiManager::handleConnect() {
 
 String CWifiManager::getTempSensorResponse() {
 #ifdef TEMP_SENSOR
-  float temp = 12.3f;
+  float temp = device->temperature();
+  bool tempInC = false;
   return String("<div>\
-    Temperature: " + String(temp, 1) + "<br/>\
-    Hunidity: TODO <br/>\
+    Temperature: " + String(tempInC ? temp : (temp*9/5)+32, 1) + (tempInC ? "C" : "F") +"<br/>\
+    Hunidity: " + String(device->humidity(), 1) + "% <br/>\
   </div>");
 #else
   return "";

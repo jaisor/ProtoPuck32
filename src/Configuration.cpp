@@ -4,6 +4,27 @@
 
 configuration_t configuration;
 
+uint8_t EEPROM_initAndCheckFactoryReset() {
+  log_i("Configuration size: %i", sizeof(configuration_t));
+  
+  EEPROM.begin(sizeof(configuration_t) + EEPROM_FACTORY_RESET + 1);
+  uint8_t resetCounter = EEPROM.read(EEPROM_FACTORY_RESET);
+
+  log_i("Factory reset counter: %i", resetCounter);
+  log_v("EEPROM length: %i", EEPROM.length());
+
+  // Bump reset counter
+  EEPROM.write(EEPROM_FACTORY_RESET, resetCounter + 1);
+  EEPROM.commit();
+
+  return resetCounter;
+}
+
+void EEPROM_clearFactoryReset() {
+  EEPROM.write(EEPROM_FACTORY_RESET, 0);
+  EEPROM.commit();
+}
+
 void EEPROM_saveConfig() {
   log_i("Saving configuration to EEPROM");
   EEPROM.put(EEPROM_CONFIGURATION_START, configuration);
@@ -12,19 +33,26 @@ void EEPROM_saveConfig() {
 
 void EEPROM_loadConfig() {
 
-  memset(&configuration, 0, sizeof(configuration_t));
-  EEPROM.begin(sizeof(configuration_t));
+  configuration = {};
   EEPROM.get(EEPROM_CONFIGURATION_START, configuration);
 
-  if (!configuration._loaded) {
+  log_i("Configuration loaded: [%s]", configuration._loaded);
+
+  if (strcmp(configuration._loaded, "jaisor")) {
     // blank
-    log_i("Blank configuration, loading defaluts");
-    configuration._loaded = true;
+    log_i("Blank configuration, loading defaults");
+    strcpy(configuration._loaded, "jaisor");
+    strcpy(configuration.name, DEVICE_NAME);
     #ifdef LED
       configuration.ledBrightness = LED_BRIGHTNESS;
+    #endif
+    #ifdef WIFI
       strcpy(configuration.ntpServer, NTP_SERVER);
       configuration.gmtOffset_sec = NTP_GMT_OFFSET_SEC;
       configuration.daylightOffset_sec = NTP_DAYLIGHT_OFFSET_SEC;
+      strcpy(configuration.mqttServer, NTP_SERVER);
+      configuration.mqttPort = 1883;
+      strcpy(configuration.mqttTopic, "");
     #endif
   }
 
@@ -39,12 +67,14 @@ void EEPROM_loadConfig() {
   String wifiStr = String(configuration.wifiSsid);
   for (auto i : wifiStr) {
     if (!isAscii(i)) {
-      log_v("Bad SSID, loading default", wifiStr);
+      log_v("Bad SSID, loading default: %s", wifiStr.c_str());
       strcpy(configuration.wifiSsid, "");
       break;
     }
   }
 #endif
+
+  log_i("Device name: %s", configuration.name);
 
   // FIXME: Always default NTP values
   strcpy(configuration.ntpServer, NTP_SERVER);

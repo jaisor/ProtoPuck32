@@ -25,13 +25,13 @@ const unsigned char _key_bitmaps [6][8] PROGMEM = {
   { 0x0, 0x0, 0x54, 0x38, 0x7c, 0x38, 0x54, 0x0 } // MIDDLE
 };
 
-CStateController::CStateController(CDevice *device)
+CStateController::CStateController(CDevice * const device)
 :device(device) {
 
     configManager = new CConfigManager();
 
 #ifdef WIFI
-    managers.push_back(new CWifiManager());
+    managers.push_back(new CWifiManager(device));
 #endif
 
 #ifdef LED
