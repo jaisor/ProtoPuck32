@@ -5,6 +5,7 @@
 
 #ifdef LED_EXTERNAL_MATRIX
 #ifdef MIC_I2S
+#include <vector>
 #include <FastLED.h>
 #include <Adafruit_GFX.h>
 

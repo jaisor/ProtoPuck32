@@ -1,6 +1,7 @@
 #ifndef _STATE_CONTROLLER_H
 #define _STATE_CONTROLLER_H
 
+#include <vector>
 #include "Configuration.h"
 #include "BaseManager.h"
 

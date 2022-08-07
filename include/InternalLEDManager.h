@@ -1,6 +1,7 @@
 #ifndef _INTERNAL_LED_MANAGER_H
 #define _INTERNAL_LED_MANAGER_H
 
+#include <vector>
 #include "LEDManager.h"
 
 class CInternalLEDManager: public CLEDManager {
