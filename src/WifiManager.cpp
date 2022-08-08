@@ -51,6 +51,7 @@ const String htmlTop FL_PROGMEM = "<html>\
 
 const String htmlBottom FL_PROGMEM = "<br><br><hr>\
   <p>Uptime: %02d:%02d:%02d | Device: %s</p>\
+  %s\
   </body>\
 </html>";
 
@@ -63,27 +64,17 @@ const String htmlWifiApConnectForm FL_PROGMEM = "<h2>Connect to WiFi Access Poin
       <input type='submit' value='Connect...'>\
     </form>";
 
-const String htmlLEDModes FL_PROGMEM = "<hr><h2>LED Mode Selector</h2>\
-    <form method='POST' action='/led_mode' enctype='application/x-www-form-urlencoded'>\
-      <label for='ssid'>Device name:</label><br>\
+const String htmlDeviceConfigs FL_PROGMEM = "<hr><h2>Configs</h2>\
+    <form method='POST' action='/config' enctype='application/x-www-form-urlencoded'>\
+      <label for='deviceName'>Device name:</label><br>\
       <input type='text' id='deviceName' name='deviceName' value='%s'><br>\
       <br>\
-      <label for='frame_delay'>LED strip length:</label><br>\
-      <input type='text' id='led_strip_size' name='led_strip_size' value='%i'> LEDs<br>\
-      <br>\
-      <label for='led_mode'>LED Mode:</label><br>\
-      <select name='led_mode' id='led_mode'>\
-      %s\
-      </select><br>\
-      <br>\
-      <label for='brightness'>Brightness:</label><br>\
-      <input type='text' id='brightness' name='brightness' value='%.2f'> range 0.0-1.0<br>\
-      <br>\
-      <label for='frame_delay'>Frame delay:</label><br>\
-      <input type='text' id='frame_delay' name='frame_delay' value='%i'> milliseconds<br>\
-      <br>\
-      <label for='cycle_delay'>Auto cycle modes every:</label><br>\
-      <input type='text' id='cycle_delay' name='cycle_delay' value='%i'> seconds (0-stay on current mode)<br>\
+      <label for='mqttServer'>MQTT Server:</label><br>\
+      <input type='text' id='mqttServer' name='mqttServer' value='%s'><br>\
+      <label for='mqttPort'>MQTT Port:</label><br>\
+      <input type='text' id='mqttPort' name='mqttPort' value='%i'><br>\
+      <label for='mqttTopic'>MQTT Topic:</label><br>\
+      <input type='text' id='mqttTopic' name='mqttTopic' value='%s'><br>\
       <br>\
       <input type='submit' value='Set...'>\
     </form>";
@@ -108,12 +99,27 @@ void handle_mqtt_message(char* topic, byte* payload, unsigned int length) {
   */
 }
 
+char _deviceId[32];
+char *getDeviceId() {
+  
+  uint32_t chipId = 0;
+    for(int i=0; i<17; i=i+8) {
+      chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+    }
+
+  log_d("Chip ID: '%i'", chipId);
+
+  sprintf_P(_deviceId, "%s_%i", WIFI_FALLBACK_SSID, chipId);
+
+  return _deviceId;
+}
+
 CWifiManager::CWifiManager(CDevice * const device)
-:device(device) {    
+:device(device), apMode(false), rebootNeeded(false) {    
   pinMode(BOARD_LED_PIN,OUTPUT);
   this->client.setClient(espClient);
   strcpy(SSID, configuration.wifiSsid);
-
+  this->server = new AsyncWebServer(WEB_SERVER_PORT);
   connect();
 }
 
@@ -185,19 +191,19 @@ void CWifiManager::connect() {
     // Join AP from Config
     log_d("Connecting to WiFi: '%s'", SSID);
     WiFi.begin(SSID, configuration.wifiPassword);
+    apMode = false;
     
   } else {
 
-    // Create AP using fallback and chip ID
-    uint32_t chipId = 0;
-    for(int i=0; i<17; i=i+8) {
-      chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
-    }
-
-    log_d("Chip ID: '%i'", chipId);
-
-    sprintf_P(softAP_SSID, "%s_%i", WIFI_FALLBACK_SSID, chipId);
-    log_d("Creating WiFi: '%s'", softAP_SSID);
+    strcpy(softAP_SSID, getDeviceId());
+    log_i("Creating WiFi: '%s' / '%s'", softAP_SSID, WIFI_FALLBACK_PASS);
+    
+    if (WiFi.softAP(softAP_SSID, WIFI_FALLBACK_PASS)) {
+      apMode = true;
+      log_i("Wifi AP '%s' created, listening on '%s'", softAP_SSID, WiFi.softAPIP().toString().c_str());
+    } else {
+      log_e("Wifi AP faliled");
+    };
     
     WiFi.softAP(softAP_SSID, WIFI_FALLBACK_PASS);
   }
@@ -209,23 +215,33 @@ void CWifiManager::listen() {
   status = WF_LISTENING;
 
   // Web
-  server.on("/", std::bind(&CWifiManager::handleRoot, this));
-  server.on("/connect", HTTP_POST, std::bind(&CWifiManager::handleConnect, this));
-  //server.on("/led/external/matrix", HTTP_POST, std::bind(&CWifiManager::handleLEDMatrix, this));
-  server.begin(WEB_SERVER_PORT);
+  server->on("/", std::bind(&CWifiManager::handleRoot, this, std::placeholders::_1));
+  server->on("/connect", HTTP_POST, std::bind(&CWifiManager::handleConnect, this, std::placeholders::_1));
+  server->on("/config", HTTP_POST, std::bind(&CWifiManager::handleConfig, this, std::placeholders::_1));
+  server->begin();
   log_d("Web server listening on port %i", WEB_SERVER_PORT);
   
   // MQTT
-  client.setServer("192.168.10.10", 1883);
+  client.setServer(configuration.mqttServer, configuration.mqttPort);
   client.setCallback(handle_mqtt_message);
 
   if (!client.connected()) {
-    log_d("Attempting MQTT connection...");
-    // Attempt to connect
+    log_d("Attempting MQTT connection to '%s:%i' ...", configuration.mqttServer, configuration.mqttPort);
     if (client.connect("arduinoClient")) {
       log_i("MQTT connected");
-      // Once connected, publish an announcement...
-      client.publish("outTopic","hello world");
+
+      if (strlen(configuration.mqttTopic)) {
+        #ifdef TEMP_SENSOR
+          char topic[255];
+          sprintf_P(topic, "%s/sensor/temperature", configuration.mqttTopic);
+          client.publish(topic,String(device->temperature(), 2).c_str());
+          sprintf_P(topic, "%s/sensor/humidity", configuration.mqttTopic);
+          client.publish(topic,String(device->humidity(), 2).c_str());
+        #endif
+      } else {
+        log_i("Blank MQTT topic");
+      }
+      
       // ... and resubscribe
       //client.subscribe("inTopic");
     } else {
@@ -240,22 +256,52 @@ void CWifiManager::listen() {
   struct tm timeinfo;
   //time()
   if(getLocalTime(&timeinfo)){
-    log_i("%i:%i", timeinfo.tm_hour,timeinfo.tm_min);
+    log_i("The time is %i:%i", timeinfo.tm_hour,timeinfo.tm_min);
     CONFIG_updateLedBrightnessTime();
   }
   
 }
 
 void CWifiManager::loop() {
-  if (WiFi.status() == WL_CONNECTED || WiFi.status() == WL_NO_SHIELD) {
+
+  if (rebootNeeded && millis() - tMillis > 200) {
+    log_i("Rebooting...");
+#ifdef ESP32
+    ESP.restart();
+#elif ESP8266
+    ESP.reset();
+#endif
+    return;
+  }
+
+  if (WiFi.status() == WL_CONNECTED || apMode ) {
     // WiFi is connected
 
-    if (status == WF_LISTENING) {  
-      // Handle requests
-      server.handleClient();
-    } else {
+    if (status != WF_LISTENING) {  
       // Start listening for requests
       listen();
+    }
+
+    // Send sensor updates periodically
+    if (millis() - tMillis > 60000) {
+      tMillis = millis();
+      // FIXME redundant code
+      if (client.connect("arduinoClient")) {
+        log_v("Sending MQTT sensor updates");
+
+        if (strlen(configuration.mqttTopic)) {
+          #ifdef TEMP_SENSOR
+            char topic[255];
+            sprintf_P(topic, "%s/sensor/temperature", configuration.mqttTopic);
+            client.publish(topic,String(device->temperature(), 2).c_str());
+            sprintf_P(topic, "%s/sensor/humidity", configuration.mqttTopic);
+            client.publish(topic,String(device->humidity(), 2).c_str());
+          #endif
+        }
+        
+        // ... and resubscribe
+        //client.subscribe("inTopic");
+      }
     }
 
   } else {
@@ -263,20 +309,16 @@ void CWifiManager::loop() {
 
     switch (status) {
       case WF_LISTENING: {
-        log_d("Disconnecting");
-        server.close();
-        client.disconnect();
+        log_i("Disconnecting %i", status);
+        server->end();
         status = WF_CONNECTING;
         connect();
       } break;
       case WF_CONNECTING: {
         if (millis() - tMillis > MAX_CONNECT_TIMEOUT_MS) {
-          log_d("Connecting failed, create an AP instead");
-          esp_wifi_stop();
-
+          log_w("Connecting failed (wifi status %i) after %l ms, create an AP instead", (millis() - tMillis), WiFi.status());
           tMillis = millis();
           strcpy(SSID, "");
-
           connect();
         }
       } break;
@@ -287,78 +329,48 @@ void CWifiManager::loop() {
   
 }
 
-void CWifiManager::handleRoot() {
-  digitalWrite(BOARD_LED_PIN, LOW);
+void CWifiManager::handleRoot(AsyncWebServerRequest *request) {
+
+  log_i("handleRoot");
   
-  char temp[1000];
   int sec = millis() / 1000;
   int min = sec / 60;
   int hr = min / 60;
 
-  snprintf(temp, 1000,
+  AsyncResponseStream *response = request->beginResponseStream("text/html");
+  response->printf(htmlTop.c_str(), configuration.name, configuration.name);
 
-           "<html>\
-  <head>\
-    <title>ESP32 Demo</title>\
-    <style>\
-      body { background-color: #303030; font-family: 'Anaheim',sans-serif; Color: #d8d8d8; }\
-    </style>\
-  </head>\
-  <body>\
-    <h1>ProtoPuck32</h1>\
-    <p>Connect to WiFi Access Point (AP)</p>\
-    <form method='POST' action='/connect' enctype='application/x-www-form-urlencoded'>\
-      <label for='ssid'>SSID (AP Name):</label><br>\
-      <input type='text' id='ssid' name='ssid'><br><br>\
-      <label for='pass'>Password (WPA2):</label><br>\
-      <input type='password' id='pass' name='password' minlength='8' autocomplete='off' required><br><br>\
-      <input type='submit' value='Connect...'>\
-    </form>\
-    <br><br><hr>\
-    %s\
-    <p>Uptime: %02d:%02d:%02d</p>\
-  </body>\
-</html>",
-           getTempSensorResponse().c_str(),
-           hr, min % 60, sec % 60
-          );
-  server.send(200, "text/html", temp);
-
-  digitalWrite(BOARD_LED_PIN, HIGH);
+  if (apMode) {
+    response->printf(htmlWifiApConnectForm.c_str());
+  } else {
+    response->printf("<p>Connected to '%s'</p>", SSID);
+  }
   
+  String modeOptions = "";
+  
+  response->printf(htmlDeviceConfigs.c_str(), configuration.name, configuration.mqttServer, 
+    configuration.mqttPort, configuration.mqttTopic);
+
+  response->printf(htmlBottom.c_str(), hr, min % 60, sec % 60, String(DEVICE_NAME), getTempSensorResponse().c_str());
+  request->send(response);
 }
 
-void CWifiManager::handleConnect() {
-  digitalWrite(BOARD_LED_PIN, LOW);
+void CWifiManager::handleConnect(AsyncWebServerRequest *request) {
 
-  String ssid = server.arg("ssid");
-  String password = server.arg("password");
+  log_i("handleConnect");
+
+  String ssid = request->arg("ssid");
+  String password = request->arg("password");
   
-  char temp[1000];
   int sec = millis() / 1000;
   int min = sec / 60;
   int hr = min / 60;
 
-  snprintf(temp, 1000,
-
-           "<html>\
-  <head>\
-    <title>ESP32 Demo</title>\
-    <style>\
-      body { background-color: #303030; font-family: 'Anaheim',sans-serif; Color: #d8d8d8; }\
-    </style>\
-  </head>\
-  <body>\
-    <h1>ProtoPuck32</h1>\
-    <p>Connecting to '%s' ... see you on the other side!</p>\
-    <p>Uptime: %02d:%02d:%02d</p>\
-  </body>\
-</html>",
-    ssid.c_str(),
-    hr, min % 60, sec % 60
-  );
-
-  server.send(200, "text/html", temp);
+  AsyncResponseStream *response = request->beginResponseStream("text/html");
+  response->printf(htmlTop.c_str(), configuration.name, configuration.name);
+  response->printf("<p>Connecting to '%s' ... see you on the other side!</p>", ssid.c_str());
+  response->printf(htmlBottom.c_str(), hr, min % 60, sec % 60, String(DEVICE_NAME), getTempSensorResponse().c_str());
+  request->send(response);
 
   ssid.toCharArray(configuration.wifiSsid, sizeof(configuration.wifiSsid));
   password.toCharArray(configuration.wifiPassword, sizeof(configuration.wifiPassword));
@@ -368,12 +380,61 @@ void CWifiManager::handleConnect() {
   EEPROM_saveConfig();
 
   strcpy(SSID, configuration.wifiSsid);
-  //connect();
+  connect();
+}
 
-  ESP.restart();
+void CWifiManager::handleConfig(AsyncWebServerRequest *request) {
 
-  digitalWrite(BOARD_LED_PIN, HIGH);
+  log_i("handleConfig");
+
+  String deviceName = request->arg("deviceName");
+  deviceName.toCharArray(configuration.name, sizeof(configuration.name));
+  log_i("Device req name: %s", deviceName);
+  log_i("Device size %i name: %s", sizeof(configuration.name), configuration.name);
+
+  String mqttServer = request->arg("mqttServer");
+  mqttServer.toCharArray(configuration.mqttServer, sizeof(configuration.mqttServer));
+  log_i("MQTT Server: %s", mqttServer);
+
+  uint16_t mqttPort = atoi(request->arg("mqttPort").c_str());
+  configuration.mqttPort = mqttPort;
+  log_i("MQTT Port: %i", mqttPort);
+
+  String mqttTopic = request->arg("mqttTopic");
+  mqttTopic.toCharArray(configuration.mqttTopic, sizeof(configuration.mqttTopic));
+  log_i("MQTT Topic: %s", mqttTopic);
   
+  EEPROM_saveConfig();
+
+    
+  // FIXME: Redudent code
+  // MQTT
+  log_d("disconnect");
+  client.disconnect();
+  log_d("setServer");
+  client.setServer(configuration.mqttServer, configuration.mqttPort);
+
+  log_d("is client.connected");
+  if (!client.connected()) {
+    log_d("Attempting MQTT connection to '%s:%i' as '%s' ...", configuration.mqttServer, configuration.mqttPort, getDeviceId());
+    log_d("client.connect");
+    if (client.connect(getDeviceId())) {
+      if (strlen(configuration.mqttTopic)) {
+        #ifdef TEMP_SENSOR
+          char topic[255];
+          sprintf_P(topic, "%s/sensor/temperature", configuration.mqttTopic);
+          client.publish(topic,String(device->temperature(), 2).c_str());
+          sprintf_P(topic, "%s/sensor/humidity", configuration.mqttTopic);
+          client.publish(topic,String(device->humidity(), 2).c_str());
+        #endif
+      } 
+
+    } else {
+      log_d("MQTT connect failed, rc=%i", client.state());
+    }
+  }
+  
+  request->redirect("/");
 }
 
 String CWifiManager::getTempSensorResponse() {

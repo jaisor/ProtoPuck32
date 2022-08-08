@@ -41,6 +41,7 @@
         "utility": "cpp",
         "typeinfo": "cpp",
         "optional": "cpp",
-        "xtr1common": "cpp"
+        "xtr1common": "cpp",
+        "string": "cpp"
     }
 }

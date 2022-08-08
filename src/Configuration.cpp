@@ -50,7 +50,7 @@ void EEPROM_loadConfig() {
       strcpy(configuration.ntpServer, NTP_SERVER);
       configuration.gmtOffset_sec = NTP_GMT_OFFSET_SEC;
       configuration.daylightOffset_sec = NTP_DAYLIGHT_OFFSET_SEC;
-      strcpy(configuration.mqttServer, NTP_SERVER);
+      strcpy(configuration.mqttServer, "");
       configuration.mqttPort = 1883;
       strcpy(configuration.mqttTopic, "");
     #endif

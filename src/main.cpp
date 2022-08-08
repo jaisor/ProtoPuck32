@@ -45,6 +45,13 @@ void setup() {
 }
 
 void loop() {
+
+  if (!smoothBoot && millis() - tsSmoothBoot > FACTORY_RESET_CLEAR_TIMER_MS) {
+    smoothBoot = true;
+    EEPROM_clearFactoryReset();
+    log_v("Device booted smoothly!");
+  }
+
   stateController->loop();
   device->loop();
 }

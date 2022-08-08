@@ -2,7 +2,16 @@
 #define _WIFI_MANAGER_H
 
 #include <WiFi.h>
-#include <WebServer.h>
+
+#ifdef ESP32
+  #include <WiFi.h>
+  #include <AsyncTCP.h>
+#elif ESP8266
+  #include <ESP8266WiFi.h>
+  #include <ESPAsyncTCP.h>
+#endif
+#include <ESPAsyncWebServer.h>
+
 #include <PubSubClient.h>
 #include "BaseManager.h"
 //#include "matrix/MatrixModeIoT.h"
@@ -19,8 +28,10 @@ private:
     wifi_status status;
     char softAP_SSID[32];
     char SSID[32];
+    bool apMode;
+    bool rebootNeeded;
 
-    WebServer server;
+    AsyncWebServer* server;
     PubSubClient client;
     //CMatrixModeIoT *ioTManager;
     CDevice * const device;
@@ -28,8 +39,9 @@ private:
     void connect();
     void listen();
 
-    void handleRoot();
-    void handleConnect();
+    void handleRoot(AsyncWebServerRequest *request);
+    void handleConnect(AsyncWebServerRequest *request);
+    void handleConfig(AsyncWebServerRequest *request);
 
     String getTempSensorResponse();
     
