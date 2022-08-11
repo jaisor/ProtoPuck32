@@ -134,7 +134,7 @@ void CStateController::drawStateHome() {
     int temp = device->temperature();
 
     bool tempInC = false;
-    display->print(String(tempInC ? temp : (temp*9/5)+32 ));
+    display->print(String(tempInC ? temp : (temp*1.8)+32 ));
     display->print(" ");
     display->setTextSize(1);
     display->cp437(true);

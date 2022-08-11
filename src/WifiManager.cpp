@@ -442,7 +442,7 @@ String CWifiManager::getTempSensorResponse() {
   float temp = device->temperature();
   bool tempInC = false;
   return String("<div>\
-    Temperature: " + String(tempInC ? temp : (temp*9/5)+32, 1) + (tempInC ? "C" : "F") +"<br/>\
+    Temperature: " + String(tempInC ? temp : (temp*1.8)+32, 1) + (tempInC ? "C" : "F") +"<br/>\
     Hunidity: " + String(device->humidity(), 1) + "% <br/>\
   </div>");
 #else
