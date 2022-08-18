@@ -57,7 +57,7 @@
             #define LED_EXTERNAL_LEAF_SIZE 70
         #endif
 
-        #define MIC_I2S
+        //#define MIC_I2S
         #ifdef MIC_I2S
             #define MIC_I2S_WS            25 
             #define MIC_I2S_SCK           27 

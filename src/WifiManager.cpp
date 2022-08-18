@@ -115,7 +115,7 @@ char *getDeviceId() {
 }
 
 CWifiManager::CWifiManager(CDevice * const device)
-:device(device), apMode(false), rebootNeeded(false) {    
+:apMode(false), rebootNeeded(false), device(device) {    
   pinMode(BOARD_LED_PIN,OUTPUT);
   this->client.setClient(espClient);
   strcpy(SSID, configuration.wifiSsid);
