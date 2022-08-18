@@ -21,7 +21,9 @@ CMatrixLEDManager::CMatrixLEDManager(CRGB *leds, const uint8_t width, const uint
 
     tMillis = tMillsChangeMode = millis();
 
-    //modes.push_back(new CMatrixModeSoundLevel(width, height));
+#ifdef MIC_I2S
+    modes.push_back(new CMatrixModeSoundLevel(width, height));
+#endif
     modes.push_back(new CMatrixModeClock(width, height));
     //modes.push_back(new CMatrixModeFireworks(width, height));
     modes.push_back(new CMatrixModeFallingStars(width, height));

@@ -32,7 +32,7 @@ private:
     bool rebootNeeded;
 
     AsyncWebServer* server;
-    PubSubClient client;
+    PubSubClient mqtt;
     //CMatrixModeIoT *ioTManager;
     CDevice * const device;
 
@@ -44,6 +44,7 @@ private:
     void handleConfig(AsyncWebServerRequest *request);
 
     String getTempSensorResponse();
+    void postSensorUpdate();
     
 #ifdef LED_EXTERNAL_MATRIX
     void handleLEDMatrix();

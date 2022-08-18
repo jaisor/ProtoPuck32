@@ -275,6 +275,8 @@ void mic_i2s_reader_task(void* parameter) {
     // Debug only. Ticks we spent filtering and summing block of I2S data
     q.proc_ticks = xTaskGetTickCount() - start_tick;
 
+    //log_d("bytes_read=%u; sum_sqr_SPL=%.2f; sum_sqr_weighted=%.2f; proc_ticks=%u", bytes_read, q.sum_sqr_SPL, q.sum_sqr_weighted, q.proc_ticks);
+
     // Send the sums to FreeRTOS queue where main task will pick them up
     // and further calcualte decibel values (division, logarithms, etc...)
     xQueueSend(samples_queue, &q, portMAX_DELAY);
@@ -312,7 +314,7 @@ CMatrixModeSoundLevel::CMatrixModeSoundLevel(uint8_t width, uint8_t height)
 
     ledWStep = (SOUND_LEVEL_MAX - SOUND_LEVEL_MIN) / ((float)width);
     ledHStep = (SOUND_LEVEL_MAX - SOUND_LEVEL_MIN) / 11.0f;
-    log_d("LED Step: w=%.2f, h=%.2f", ledWStep, ledHStep);
+    //log_d("LED Step: w=%.2f, h=%.2f", ledWStep, ledHStep);
 
     tMillisHistory = 0;
     dbRunningAvg = SOUND_LEVEL_MIN;
@@ -350,7 +352,8 @@ void CMatrixModeSoundLevel::draw(CRGB *leds) {
             Leq_sum_sqr = 0;
             Leq_samples = 0;
             
-            //log_i("%.1f\n", Leq_dB);
+            //log_i("Leq_dB=%.1f; Leq_RMS=%0.1f; MIC_OFFSET_DB=%0.1f; MIC_REF_DB=%0.1f; MIC_REF_AMPL=%0.1f; \n", Leq_dB, Leq_RMS, MIC_OFFSET_DB, MIC_REF_DB, MIC_REF_AMPL);
+            //log_i("Leq_dB=%.1f; Leq_RMS=%0.1f; MIC_OFFSET_DB=%0.1f; MIC_REF_DB=%0.1f; MIC_REF_AMPL=%0.1f; \n", Leq_dB, Leq_RMS, MIC_OFFSET_DB, MIC_REF_DB, MIC_REF_AMPL);
             
             // Debug only
             //log_d("%u processing ticks\n", q.proc_ticks);

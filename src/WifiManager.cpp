@@ -117,7 +117,7 @@ char *getDeviceId() {
 CWifiManager::CWifiManager(CDevice * const device)
 :apMode(false), rebootNeeded(false), device(device) {    
   pinMode(BOARD_LED_PIN,OUTPUT);
-  this->client.setClient(espClient);
+  this->mqtt.setClient(espClient);
   strcpy(SSID, configuration.wifiSsid);
   this->server = new AsyncWebServer(WEB_SERVER_PORT);
   connect();
@@ -222,30 +222,18 @@ void CWifiManager::listen() {
   log_d("Web server listening on port %i", WEB_SERVER_PORT);
   
   // MQTT
-  client.setServer(configuration.mqttServer, configuration.mqttPort);
-  client.setCallback(handle_mqtt_message);
+  mqtt.setServer(configuration.mqttServer, configuration.mqttPort);
+  mqtt.setCallback(handle_mqtt_message);
 
-  if (!client.connected()) {
+  if (!mqtt.connected()) {
     log_d("Attempting MQTT connection to '%s:%i' ...", configuration.mqttServer, configuration.mqttPort);
-    if (client.connect("arduinoClient")) {
+    if (mqtt.connect("arduinoClient")) {
       log_i("MQTT connected");
-
-      if (strlen(configuration.mqttTopic)) {
-        #ifdef TEMP_SENSOR
-          char topic[255];
-          sprintf_P(topic, "%s/sensor/temperature", configuration.mqttTopic);
-          client.publish(topic,String(device->temperature(), 2).c_str());
-          sprintf_P(topic, "%s/sensor/humidity", configuration.mqttTopic);
-          client.publish(topic,String(device->humidity(), 2).c_str());
-        #endif
-      } else {
-        log_i("Blank MQTT topic");
-      }
-      
+      postSensorUpdate();
       // ... and resubscribe
       //client.subscribe("inTopic");
     } else {
-      log_d("MQTT connect failed, rc=%i", client.state());
+      log_d("MQTT connect failed, rc=%i", mqtt.state());
     }
   }
 
@@ -285,23 +273,7 @@ void CWifiManager::loop() {
     // Send sensor updates periodically
     if (millis() - tMillis > 60000) {
       tMillis = millis();
-      // FIXME redundant code
-      if (client.connect("arduinoClient")) {
-        log_v("Sending MQTT sensor updates");
-
-        if (strlen(configuration.mqttTopic)) {
-          #ifdef TEMP_SENSOR
-            char topic[255];
-            sprintf_P(topic, "%s/sensor/temperature", configuration.mqttTopic);
-            client.publish(topic,String(device->temperature(), 2).c_str());
-            sprintf_P(topic, "%s/sensor/humidity", configuration.mqttTopic);
-            client.publish(topic,String(device->humidity(), 2).c_str());
-          #endif
-        }
-        
-        // ... and resubscribe
-        //client.subscribe("inTopic");
-      }
+      postSensorUpdate();
     }
 
   } else {
@@ -385,56 +357,33 @@ void CWifiManager::handleConnect(AsyncWebServerRequest *request) {
 
 void CWifiManager::handleConfig(AsyncWebServerRequest *request) {
 
-  log_i("handleConfig");
+    log_i("handleConfig");
 
-  String deviceName = request->arg("deviceName");
-  deviceName.toCharArray(configuration.name, sizeof(configuration.name));
-  log_i("Device req name: %s", deviceName);
-  log_i("Device size %i name: %s", sizeof(configuration.name), configuration.name);
+    String deviceName = request->arg("deviceName");
+    deviceName.toCharArray(configuration.name, sizeof(configuration.name));
+    log_i("Device req name: %s", deviceName);
+    log_i("Device size %i name: %s", sizeof(configuration.name), configuration.name);
 
-  String mqttServer = request->arg("mqttServer");
-  mqttServer.toCharArray(configuration.mqttServer, sizeof(configuration.mqttServer));
-  log_i("MQTT Server: %s", mqttServer);
+    String mqttServer = request->arg("mqttServer");
+    mqttServer.toCharArray(configuration.mqttServer, sizeof(configuration.mqttServer));
+    log_i("MQTT Server: %s", mqttServer);
 
-  uint16_t mqttPort = atoi(request->arg("mqttPort").c_str());
-  configuration.mqttPort = mqttPort;
-  log_i("MQTT Port: %i", mqttPort);
+    uint16_t mqttPort = atoi(request->arg("mqttPort").c_str());
+    configuration.mqttPort = mqttPort;
+    log_i("MQTT Port: %i", mqttPort);
 
-  String mqttTopic = request->arg("mqttTopic");
-  mqttTopic.toCharArray(configuration.mqttTopic, sizeof(configuration.mqttTopic));
-  log_i("MQTT Topic: %s", mqttTopic);
-  
-  EEPROM_saveConfig();
+    String mqttTopic = request->arg("mqttTopic");
+    mqttTopic.toCharArray(configuration.mqttTopic, sizeof(configuration.mqttTopic));
+    log_i("MQTT Topic: %s", mqttTopic);
 
-    
-  // FIXME: Redudent code
-  // MQTT
-  log_d("disconnect");
-  client.disconnect();
-  log_d("setServer");
-  client.setServer(configuration.mqttServer, configuration.mqttPort);
+    EEPROM_saveConfig();
 
-  log_d("is client.connected");
-  if (!client.connected()) {
-    log_d("Attempting MQTT connection to '%s:%i' as '%s' ...", configuration.mqttServer, configuration.mqttPort, getDeviceId());
-    log_d("client.connect");
-    if (client.connect(getDeviceId())) {
-      if (strlen(configuration.mqttTopic)) {
-        #ifdef TEMP_SENSOR
-          char topic[255];
-          sprintf_P(topic, "%s/sensor/temperature", configuration.mqttTopic);
-          client.publish(topic,String(device->temperature(), 2).c_str());
-          sprintf_P(topic, "%s/sensor/humidity", configuration.mqttTopic);
-          client.publish(topic,String(device->humidity(), 2).c_str());
-        #endif
-      } 
-
-    } else {
-      log_d("MQTT connect failed, rc=%i", client.state());
+    // TODO check if MQTT reconnect is needed
+    if (strlen(configuration.mqttServer) && strlen(configuration.mqttTopic)) {
+        rebootNeeded = true;
     }
-  }
-  
-  request->redirect("/");
+
+    request->redirect("/");
 }
 
 String CWifiManager::getTempSensorResponse() {
@@ -448,6 +397,62 @@ String CWifiManager::getTempSensorResponse() {
 #else
   return "";
 #endif
+}
+
+void CWifiManager::postSensorUpdate() {
+    if (!mqtt.connected()) {
+        if (mqtt.state() < MQTT_CONNECTED 
+            && strlen(configuration.mqttServer) && strlen(configuration.mqttTopic)) { // Reconnectable
+            log_d("Attempting to reconnect from MQTT state %i at '%s:%i' ...", mqtt.state(), configuration.mqttServer, configuration.mqttPort);
+            if (mqtt.connect("arduinoClient")) {
+                log_i("MQTT reconnected");
+            } else {
+                log_w("MQTT reconnect failed, rc=%i", mqtt.state());
+            }
+        }
+        if (!mqtt.connected()) {
+            log_d("MQTT not connected %i", mqtt.state());
+            return;
+        }
+    }
+
+    if (!strlen(configuration.mqttTopic)) {
+        log_w("Blank MQTT topic");
+        return;
+    }
+
+    char topic[255];
+    bool current;
+    float v;
+
+#ifdef TEMP_SENSOR
+    sprintf_P(topic, "%s/sensor/temperature", configuration.mqttTopic);
+    mqtt.publish(topic,String(device->temperature(), 2).c_str());
+    log_d("Sent '%FC' temp to MQTT topic '%s'", v, topic);
+
+    sprintf_P(topic, "%s/sensor/humidity", configuration.mqttTopic);
+    mqtt.publish(topic,String(device->humidity(), 2).c_str());
+    log_d("Sent '%F%' humidity to MQTT topic '%s'", v, topic);
+#endif
+
+#ifdef BATTERY_SENSOR
+    v = (float)(batteryVoltage + sensorProvider->getBatteryVoltage(NULL)) / 2.0;
+    sprintf_P(topic, "%s/sensor/battery", configuration.mqttTopic);
+    mqtt.publish(topic,String(v, 2).c_str());
+    Log.noticeln("Sent '%Fv' battery voltage to MQTT topic '%s'", v, topic);
+
+    int iv = analogRead(BATTERY_SENSOR_ADC_PIN);
+    sprintf_P(topic, "%s/sensor/adc_raw", configuration.mqttTopic);
+    mqtt.publish(topic,String(iv).c_str());
+    Log.noticeln("Sent '%i' raw ADC value to MQTT topic '%s'", iv, topic);
+
+#endif
+
+    time_t now; 
+    time(&now);
+    sprintf_P(topic, "%s/sensor/timestamp", configuration.mqttTopic);
+    mqtt.publish(topic,String(now).c_str());
+    log_d("Sent '%u' timestamp to MQTT topic '%s'", (unsigned long)now, topic);
 }
 
 #ifdef LED_EXTERNAL_MATRIX
