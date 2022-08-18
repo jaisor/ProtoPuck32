@@ -457,11 +457,12 @@ String CWifiManager::getTempSensorResponse() {
   Ex: 0 0 ffbbdd,1 0 c91232
 */
 void CWifiManager::handleLEDMatrix() {
+    /*
   digitalWrite(BOARD_LED_PIN, LOW);
 
   //matrix_pixel_t pixels[LED_EXTERNAL_MATRIX_WIDTH * LED_EXTERNAL_MATRIX_HEIGHT];
 
-  String postBody = server.arg("plain");
+  String postBody = server->arg("plain");
   log_d("LED Matrinx: %s", postBody.c_str());
 
   //ioTManager->setLeds(pixels);
@@ -479,9 +480,10 @@ void CWifiManager::handleLEDMatrix() {
   
   //postBody.indexOf()
   
-
+/*
   
-  server.send(200, "text/html", "OK");
+  server->send(200, "text/html", "OK");
   digitalWrite(BOARD_LED_PIN, HIGH);
+  */
 }
 #endif
