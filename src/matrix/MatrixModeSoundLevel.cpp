@@ -367,7 +367,7 @@ void CMatrixModeSoundLevel::draw(CRGB *leds) {
     if (millis() - tMillisHistory > DB_HISTORY_INTERVAL_MS) {
         tMillisHistory = millis();
         dbRunningAvg = dbRunningSum / (float)dbRunningCount;
-        log_d("Avg %.2f over %i samples, history length %i", dbRunningAvg, dbRunningCount, dbHistory.size());
+        //log_d("Avg %.2f over %i samples, history length %i", dbRunningAvg, dbRunningCount, dbHistory.size());
         dbHistory.push_back(dbRunningMax);
         if (dbHistory.size() > width) {
             dbHistory.erase(dbHistory.begin());

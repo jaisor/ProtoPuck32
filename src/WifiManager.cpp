@@ -423,16 +423,18 @@ void CWifiManager::postSensorUpdate() {
 
     char topic[255];
     bool current;
-    float v;
+    float v; int iv;
 
 #ifdef TEMP_SENSOR
+    v = device->temperature();
     sprintf_P(topic, "%s/sensor/temperature", configuration.mqttTopic);
-    mqtt.publish(topic,String(device->temperature(), 2).c_str());
+    mqtt.publish(topic,String(v, 2).c_str());
     log_d("Sent '%FC' temp to MQTT topic '%s'", v, topic);
 
+    v = device->humidity();
     sprintf_P(topic, "%s/sensor/humidity", configuration.mqttTopic);
-    mqtt.publish(topic,String(device->humidity(), 2).c_str());
-    log_d("Sent '%F%' humidity to MQTT topic '%s'", v, topic);
+    mqtt.publish(topic,String(v, 2).c_str());
+    log_d("Sent '%F%%' humidity to MQTT topic '%s'", v, topic);
 #endif
 
 #ifdef BATTERY_SENSOR
@@ -447,6 +449,11 @@ void CWifiManager::postSensorUpdate() {
     Log.noticeln("Sent '%i' raw ADC value to MQTT topic '%s'", iv, topic);
 
 #endif
+
+    iv = dBmtoPercentage(WiFi.RSSI());
+    sprintf_P(topic, "%s/sensor/wifi_signal", configuration.mqttTopic);
+    mqtt.publish(topic,String(v, 2).c_str());
+    log_d("Sent '%i%%' WIFI Signal to MQTT topic '%s'", iv, topic);
 
     time_t now; 
     time(&now);
