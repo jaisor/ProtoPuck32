@@ -13,6 +13,7 @@
 #include <ESPAsyncWebServer.h>
 
 #include <PubSubClient.h>
+#include <ArduinoJson.h>
 #include "BaseManager.h"
 //#include "matrix/MatrixModeIoT.h"
 
@@ -36,12 +37,15 @@ private:
     //CMatrixModeIoT *ioTManager;
     CDevice * const device;
 
+    StaticJsonDocument<2048> sensorJson;
+
     void connect();
     void listen();
 
     void handleRoot(AsyncWebServerRequest *request);
     void handleConnect(AsyncWebServerRequest *request);
     void handleConfig(AsyncWebServerRequest *request);
+    void handleFactoryReset(AsyncWebServerRequest *request);
 
     String getTempSensorResponse();
     void postSensorUpdate();

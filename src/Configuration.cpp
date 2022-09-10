@@ -53,7 +53,10 @@ void EEPROM_loadConfig() {
       strcpy(configuration.mqttServer, "");
       configuration.mqttPort = 1883;
       strcpy(configuration.mqttTopic, "");
+      configuration.mqttDataType = MQTT_DATA_JSON;
     #endif
+
+    configuration.tempUnit = TEMP_UNIT_FAHRENHEIT;
   }
 
 #ifdef LED
@@ -85,10 +88,11 @@ void EEPROM_loadConfig() {
 }
 
 void EEPROM_wipe() {
-  log_w("Wiping configuration!");
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
+  log_w("Wiping configuration with size %i!", EEPROM.length());
+  for (uint16_t i = 0; i < EEPROM.length() ; i++) {
     EEPROM.write(i, 0);
   }
+  EEPROM.commit();
 }
 
 #ifdef LED

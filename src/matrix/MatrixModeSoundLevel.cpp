@@ -389,18 +389,18 @@ void CMatrixModeSoundLevel::draw(CRGB *leds) {
         uint8_t dba = (uint8_t)Leq_dB;
 
         canvas->setCursor(3, 20);
-        canvas->setTextColor(CRGB_to_RGB565(ColorFromPalette(GreenYellowRed_p, dba * 2, 255 * configuration.ledBrightness, NOBLEND)));
+        canvas->setTextColor(CRGB_to_RGB565(ColorFromPalette(GreenYellowRed_p, dba * 2, 255 * configuration.ledBrightnessTime, NOBLEND)));
         canvas->setFont(&TomThumb);
         canvas->printf("%3i", dba);
 
-        canvas->setTextColor(CRGB_to_RGB565(CRGB(255 * configuration.ledBrightness, 255 * configuration.ledBrightness, 255 * configuration.ledBrightness)));
+        canvas->setTextColor(CRGB_to_RGB565(CRGB(255 * configuration.ledBrightnessTime, 255 * configuration.ledBrightnessTime, 255 * configuration.ledBrightnessTime)));
         canvas->setCursor(14, 19);
         canvas->setFont(&Picopixel);
         canvas->printf("dB");
 
         drawCanvas(leds);
 
-        CRGB c = CRGB(50 * configuration.ledBrightness, 50 * configuration.ledBrightness, 50 * configuration.ledBrightness);
+        CRGB c = CRGB(50 * configuration.ledBrightnessTime, 50 * configuration.ledBrightnessTime, 50 * configuration.ledBrightnessTime);
         for (uint8_t x=0; x<22; x++) {
             leds[ XYsafe(x, 12) ]  = c;
         }
@@ -409,7 +409,7 @@ void CMatrixModeSoundLevel::draw(CRGB *leds) {
         if (dba < SOUND_LEVEL_MIN) { dba = SOUND_LEVEL_MIN; }
         if (dba > SOUND_LEVEL_MAX) { dba = SOUND_LEVEL_MAX; }
         for (uint8_t i=SOUND_LEVEL_MIN; i<dba; i++) {
-            CRGB c = ColorFromPalette(GreenYellowRed_p, i * 2, 255 * configuration.ledBrightness, NOBLEND);
+            CRGB c = ColorFromPalette(GreenYellowRed_p, i * 2, 255 * configuration.ledBrightnessTime, NOBLEND);
             uint8_t x = (i - SOUND_LEVEL_MIN) / ledWStep;
             leds[ XYsafe(x, 13) ]  = c;
             leds[ XYsafe(x, 21) ]  = c;
@@ -421,7 +421,7 @@ void CMatrixModeSoundLevel::draw(CRGB *leds) {
             if (hdb < SOUND_LEVEL_MIN) { hdb = SOUND_LEVEL_MIN; }
             if (hdb > SOUND_LEVEL_MAX) { hdb = SOUND_LEVEL_MAX; } 
 
-            CRGB c = ColorFromPalette(GreenYellowRed_p, hdb * 2, 255 * configuration.ledBrightness, NOBLEND);
+            CRGB c = ColorFromPalette(GreenYellowRed_p, hdb * 2, 255 * configuration.ledBrightnessTime, NOBLEND);
             uint8_t y = (hdb - SOUND_LEVEL_MIN) / ledHStep;
 
             leds[ XYsafe(x++, 11-y) ] = c;

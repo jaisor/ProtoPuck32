@@ -20,11 +20,13 @@ bool smoothBoot;
 float p = 0;
 
 void setup() {
-  delay( 1000 ); // power-up safety delay
+  delay( 100 ); // power-up safety delay
 
-  Serial.begin(115200);
-  while(!Serial && !Serial.available()){}
+  Serial.begin(115200);  while (!Serial); delay(200);
   randomSeed(analogRead(0));
+
+  Log.begin(LOG_LEVEL_NOTICE, &Serial);
+  Log.noticeln("Initializing...");  
 
   if (EEPROM_initAndCheckFactoryReset() >= 3) {
     log_w("Factory reset conditions met!");
