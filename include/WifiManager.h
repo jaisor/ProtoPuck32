@@ -29,6 +29,7 @@ private:
     wifi_status status;
     char softAP_SSID[32];
     char SSID[32];
+    char mqttSubcribeTopicConfig[255];
     bool apMode;
     bool rebootNeeded;
 
@@ -38,6 +39,7 @@ private:
     CDevice * const device;
 
     StaticJsonDocument<2048> sensorJson;
+    StaticJsonDocument<2048> configJson;
 
     void connect();
     void listen();
@@ -53,6 +55,8 @@ private:
 #ifdef LED_EXTERNAL_MATRIX
     void handleLEDMatrix();
 #endif
+
+    void mqttCallback(char *topic, uint8_t *payload, unsigned int);
     
 public:
 	CWifiManager(CDevice * const device);

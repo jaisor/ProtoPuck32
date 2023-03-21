@@ -91,26 +91,6 @@ const String htmlDeviceConfigs FL_PROGMEM = "<hr><h2>Configs</h2>\
     <input type='submit' value='Set...'>\
   </form>";
 
-void handle_mqtt_message(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  char message[50];
-
-  /*
-  ByteToChar(payload, message, length);
-  Serial.println(message);
-
-  if (!strcmp(topic, "redacted")) {
-  handle_redled(message, length);
-  }
-
-  if (!strcmp(topic, "redacted")) {
-  handle_relay(message, length);
-  }
-  */
-}
-
 char _deviceId[32];
 char *getDeviceId() {
   
@@ -232,7 +212,9 @@ void CWifiManager::listen() {
   server->on("/config", HTTP_POST, std::bind(&CWifiManager::handleConfig, this, std::placeholders::_1));
   server->on("/factory_reset", HTTP_POST, std::bind(&CWifiManager::handleFactoryReset, this, std::placeholders::_1));
   server->begin();
-  log_d("Web server listening on port %i", WEB_SERVER_PORT);
+  Log.infoln("Web server listening on %s port %i", WiFi.localIP().toString().c_str(), WEB_SERVER_PORT);
+
+  sensorJson["ip"] = WiFi.localIP();
   
   // NTP
   log_i("Configuring time from %s at %i (%i)", configuration.ntpServer, configuration.gmtOffset_sec, configuration.daylightOffset_sec);
@@ -242,7 +224,11 @@ void CWifiManager::listen() {
 
   // MQTT
   mqtt.setServer(configuration.mqttServer, configuration.mqttPort);
-  mqtt.setCallback(handle_mqtt_message);
+  
+  using std::placeholders::_1;
+  using std::placeholders::_2;
+  using std::placeholders::_3;
+  mqtt.setCallback(std::bind( &CWifiManager::mqttCallback, this, _1,_2,_3));
 
   if (!mqtt.connected()) {
     log_d("Attempting MQTT connection to '%s:%i' ...", configuration.mqttServer, configuration.mqttPort);
@@ -501,6 +487,8 @@ void CWifiManager::postSensorUpdate() {
     sensorJson["temperature_unit"] = tunit;
     sensorJson["humidity"] = vh;
     sensorJson["humidit_unit"] = "percent";
+    sensorJson["ledBrightness"] = configuration.ledBrightness;
+    
   }
 #endif
 
@@ -619,4 +607,40 @@ void CWifiManager::handleFactoryReset(AsyncWebServerRequest *request) {
   rebootNeeded = true;
   
   request->send(response);
+}
+
+void CWifiManager::mqttCallback(char *topic, uint8_t *payload, unsigned int length) {
+
+  if (length == 0) {
+    return;
+  }
+
+  Log.noticeln("Received %u bytes message on MQTT topic '%s'", length, topic);
+  if (!strcmp(topic, mqttSubcribeTopicConfig)) {
+    deserializeJson(configJson, (const byte*)payload, length);
+
+    String jsonStr;
+    serializeJson(configJson, jsonStr);
+    Log.noticeln("Received configuration over MQTT with json: '%s'", jsonStr.c_str());
+
+    if (configJson.containsKey("ledBrightness")) {
+      configuration.ledBrightness = configJson["ledBrightness"].as<float>();
+    }
+
+    if (configJson.containsKey("name")) {
+      strncpy(configuration.name, configJson["name"], 128);
+    }
+
+    if (configJson.containsKey("mqttTopic")) {
+      strncpy(configuration.mqttTopic, configJson["mqttTopic"], 64);
+    }
+
+    // Delete the config message in case it was retained
+    mqtt.publish(mqttSubcribeTopicConfig, NULL, 0, true);
+    Log.noticeln("Deleted config message");
+
+    EEPROM_saveConfig();
+    postSensorUpdate();
+  }
+  
 }
