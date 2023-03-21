@@ -80,10 +80,10 @@ void EEPROM_loadConfig() {
   log_i("Device name: %s", configuration.name);
 
   // FIXME: Always default NTP values
-  strcpy(configuration.ntpServer, NTP_SERVER);
-  configuration.gmtOffset_sec = NTP_GMT_OFFSET_SEC;
-  configuration.daylightOffset_sec = NTP_DAYLIGHT_OFFSET_SEC;
-  configuration.ledBrightnessTime = configuration.ledBrightness;
+  //strcpy(configuration.ntpServer, NTP_SERVER);
+  //configuration.gmtOffset_sec = NTP_GMT_OFFSET_SEC;
+  //configuration.daylightOffset_sec = NTP_DAYLIGHT_OFFSET_SEC;
+  //configuration.ledBrightnessTime = configuration.ledBrightness;
 
 }
 
@@ -102,11 +102,13 @@ void CONFIG_updateLedBrightnessTime() {
   if (timeUpdated) {
     
     float dimmer = 1;
+    /*
     if (timeinfo.tm_hour >= 20 && timeinfo.tm_hour < 21) {
       dimmer = 0.2;
     } else if (timeinfo.tm_hour >= 21 || timeinfo.tm_hour < 7) {
       dimmer = 0;
     }
+    */
 
     configuration.ledBrightnessTime = configuration.ledBrightness * dimmer;
   }

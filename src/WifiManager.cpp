@@ -52,7 +52,7 @@ const String htmlTop FL_PROGMEM = "<html>\
   <h1>%s ProtoPuck32</h1>";
 
 const String htmlBottom FL_PROGMEM = "<br><br><hr>\
-  <p>Uptime: %02d:%02d:%02d | Device: %s</p>\
+  <p>Uptime: %02d:%02d:%02d | Device time: %s | Device: %s</p>\
   %s\
   <form method='POST' action='/factory_reset' enctype='application/x-www-form-urlencoded'>\
     <input type='submit' style='font-size: 6pt; color: red; background-color: black;' value='Factory Reset...'>\
@@ -80,6 +80,13 @@ const String htmlDeviceConfigs FL_PROGMEM = "<hr><h2>Configs</h2>\
     <input type='text' id='mqttPort' name='mqttPort' value='%i'><br>\
     <label for='mqttTopic'>MQTT Topic:</label><br>\
     <input type='text' id='mqttTopic' name='mqttTopic' value='%s'><br>\
+    <br>\
+    <label for='ntpServer'>NTP Server:</label><br>\
+    <input type='text' id='ntpServer' name='ntpServer' value='%s'><br>\
+    <label for='gmtOffset_sec'>GMT Offset:</label><br>\
+    <input type='text' id='gmtOffset_sec' name='gmtOffset_sec' value='%li'> sec.<br>\
+    <label for='daylightOffset_sec'>Daylight Offset:</label><br>\
+    <input type='text' id='daylightOffset_sec' name='daylightOffset_sec' value='%i'> sec.<br>\
     <br>\
     <input type='submit' value='Set...'>\
   </form>";
@@ -238,23 +245,23 @@ void CWifiManager::listen() {
   mqtt.setCallback(handle_mqtt_message);
 
   if (!mqtt.connected()) {
-  log_d("Attempting MQTT connection to '%s:%i' ...", configuration.mqttServer, configuration.mqttPort);
-  if (mqtt.connect("arduinoClient")) {
-    log_i("MQTT connected");
-    postSensorUpdate();
-    // ... and resubscribe
-    //client.subscribe("inTopic");
-  } else {
-    log_d("MQTT connect failed, rc=%i", mqtt.state());
-  }
+    log_d("Attempting MQTT connection to '%s:%i' ...", configuration.mqttServer, configuration.mqttPort);
+    if (mqtt.connect("arduinoClient")) {
+      log_i("MQTT connected");
+      postSensorUpdate();
+      // ... and resubscribe
+      //client.subscribe("inTopic");
+    } else {
+      log_d("MQTT connect failed, rc=%i", mqtt.state());
+    }
   }
 
   configTime(configuration.gmtOffset_sec, configuration.daylightOffset_sec, configuration.ntpServer);
   struct tm timeinfo;
   //time()
   if(getLocalTime(&timeinfo)){
-  log_i("The time is %i:%i", timeinfo.tm_hour,timeinfo.tm_min);
-  CONFIG_updateLedBrightnessTime();
+    log_i("The time is %i:%i", timeinfo.tm_hour,timeinfo.tm_min);
+    CONFIG_updateLedBrightnessTime();
   }
   
 }
@@ -330,9 +337,15 @@ void CWifiManager::handleRoot(AsyncWebServerRequest *request) {
   String modeOptions = "";
   
   response->printf(htmlDeviceConfigs.c_str(), configuration.name, configuration.mqttServer, 
-  configuration.mqttPort, configuration.mqttTopic);
+  configuration.mqttPort, configuration.mqttTopic, configuration.ntpServer, configuration.gmtOffset_sec, configuration.daylightOffset_sec);
 
-  response->printf(htmlBottom.c_str(), hr, min % 60, sec % 60, String(DEVICE_NAME), getTempSensorResponse().c_str());
+  char dTime[100] = "";
+  struct tm timeinfo;
+  if(getLocalTime(&timeinfo)) {
+    strftime(dTime, 100, "%F %T %z", &timeinfo);
+  }
+
+  response->printf(htmlBottom.c_str(), hr, min % 60, sec % 60, dTime, String(DEVICE_NAME), getTempSensorResponse().c_str());
   request->send(response);
 }
 
@@ -347,10 +360,16 @@ void CWifiManager::handleConnect(AsyncWebServerRequest *request) {
   int min = sec / 60;
   int hr = min / 60;
 
+  char dTime[100] = "";
+  struct tm timeinfo;
+  if(getLocalTime(&timeinfo)) {
+    strftime(dTime, 100, "%F %T %z", &timeinfo);
+  }
+
   AsyncResponseStream *response = request->beginResponseStream("text/html");
   response->printf(htmlTop.c_str(), configuration.name, configuration.name);
   response->printf("<p>Connecting to '%s' ... see you on the other side!</p>", ssid.c_str());
-  response->printf(htmlBottom.c_str(), hr, min % 60, sec % 60, String(DEVICE_NAME), getTempSensorResponse().c_str());
+  response->printf(htmlBottom.c_str(), hr, min % 60, sec % 60, dTime, String(DEVICE_NAME), getTempSensorResponse().c_str());
   request->send(response);
 
   ssid.toCharArray(configuration.wifiSsid, sizeof(configuration.wifiSsid));
@@ -384,6 +403,25 @@ void CWifiManager::handleConfig(AsyncWebServerRequest *request) {
   String mqttTopic = request->arg("mqttTopic");
   mqttTopic.toCharArray(configuration.mqttTopic, sizeof(configuration.mqttTopic));
   log_i("MQTT Topic: %s", mqttTopic);
+
+  String ntpServer = request->arg("ntpServer");
+  ntpServer.toCharArray(configuration.ntpServer, sizeof(configuration.ntpServer));
+  log_i("ntpServer: %s", ntpServer);
+
+  long gmtOffset_sec = atol(request->arg("gmtOffset_sec").c_str());
+  configuration.gmtOffset_sec = gmtOffset_sec;
+  log_i("gmtOffset_sec: %l", gmtOffset_sec);
+
+  int daylightOffset_sec = atoi(request->arg("daylightOffset_sec").c_str());
+  configuration.daylightOffset_sec = daylightOffset_sec;
+  log_i("daylightOffset_sec: %i", daylightOffset_sec);
+
+  configTime(configuration.gmtOffset_sec, configuration.daylightOffset_sec, configuration.ntpServer);
+  struct tm timeinfo;
+  if(getLocalTime(&timeinfo)){
+    log_i("The time is %i:%i", timeinfo.tm_hour,timeinfo.tm_min);
+    CONFIG_updateLedBrightnessTime();
+  }
 
   EEPROM_saveConfig();
 
