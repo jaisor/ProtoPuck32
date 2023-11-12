@@ -61,7 +61,7 @@
     #define MIC_I2S
     #ifdef MIC_I2S
       #define MIC_I2S_WS      25 
-      #define MIC_I2S_SCK       27 
+      #define MIC_I2S_SCK     27 
       #define MIC_I2S_SD      26
       // I2S peripheral to use (0 or 1)
       #define MIC_I2S_PORT      I2S_NUM_0
