@@ -12,7 +12,7 @@
 #include "WifiManager.h"
 #include "Configuration.h"
 
-#define MAX_CONNECT_TIMEOUT_MS 10000 // 10 seconds to connect before creating its own AP
+#define MAX_CONNECT_TIMEOUT_MS 15000 // 10 seconds to connect before creating its own AP
 #define BOARD_LED_PIN 2
 
 const int RSSI_MAX =-50;// define maximum straighten of signal in dBm
@@ -33,12 +33,12 @@ int dBmtoPercentage(int dBm) {
 }
 
 const unsigned char icon_wifi [] PROGMEM = {
-	0x00, 0x00, 0x70, 0x00, 0x7e, 0x00, 0x07, 0x80, 0x01, 0xc0, 0x70, 0xe0, 0x7c, 0x30, 0x0e, 0x38, 
-	0x03, 0x18, 0x61, 0x8c, 0x78, 0xcc, 0x1c, 0xc4, 0x0c, 0x66, 0x46, 0x66, 0x66, 0x66, 0x00, 0x00
+  0x00, 0x00, 0x70, 0x00, 0x7e, 0x00, 0x07, 0x80, 0x01, 0xc0, 0x70, 0xe0, 0x7c, 0x30, 0x0e, 0x38, 
+  0x03, 0x18, 0x61, 0x8c, 0x78, 0xcc, 0x1c, 0xc4, 0x0c, 0x66, 0x46, 0x66, 0x66, 0x66, 0x00, 0x00
 };
 
 const unsigned char icon_ip [] PROGMEM = {
-	0x0, 0xee, 0x49, 0x49, 0x4e, 0x48, 0xe8, 0x0
+  0x0, 0xee, 0x49, 0x49, 0x4e, 0x48, 0xe8, 0x0
 };
 
 const String htmlTop FL_PROGMEM = "<html>\
@@ -112,6 +112,7 @@ CWifiManager::CWifiManager(CDevice * const device)
   this->mqtt.setClient(espClient);
   strcpy(SSID, configuration.wifiSsid);
   this->server = new AsyncWebServer(WEB_SERVER_PORT);
+  wifiRetries = 0;
   connect();
 }
 
@@ -180,24 +181,26 @@ void CWifiManager::connect() {
 
   if (strlen(SSID)) {
 
-  // Join AP from Config
-  log_d("Connecting to WiFi: '%s'", SSID);
-  WiFi.begin(SSID, configuration.wifiPassword);
-  apMode = false;
+    // Join AP from Config
+    log_d("Connecting to WiFi: '%s'", SSID);
+    WiFi.begin(SSID, configuration.wifiPassword);
+    apMode = false;
+    wifiRetries = 0;
   
   } else {
 
-  strcpy(softAP_SSID, getDeviceId());
-  log_i("Creating WiFi: '%s' / '%s'", softAP_SSID, WIFI_FALLBACK_PASS);
-  
-  if (WiFi.softAP(softAP_SSID, WIFI_FALLBACK_PASS)) {
-    apMode = true;
-    log_i("Wifi AP '%s' created, listening on '%s'", softAP_SSID, WiFi.softAPIP().toString().c_str());
-  } else {
-    log_e("Wifi AP faliled");
-  };
-  
-  WiFi.softAP(softAP_SSID, WIFI_FALLBACK_PASS);
+    strcpy(softAP_SSID, getDeviceId());
+    log_i("Creating WiFi: '%s' / '%s'", softAP_SSID, WIFI_FALLBACK_PASS);
+    
+    if (WiFi.softAP(softAP_SSID, WIFI_FALLBACK_PASS)) {
+      wifiRetries = 0;
+      apMode = true;
+      log_i("Wifi AP '%s' created, listening on '%s'", softAP_SSID, WiFi.softAPIP().toString().c_str());
+    } else {
+      log_e("Wifi AP faliled");
+    };
+    
+    WiFi.softAP(softAP_SSID, WIFI_FALLBACK_PASS);
   }
   
 }
@@ -283,18 +286,21 @@ void CWifiManager::loop() {
 
   switch (status) {
     case WF_LISTENING: {
-    log_i("Disconnecting %i", status);
-    server->end();
-    status = WF_CONNECTING;
-    connect();
+      log_i("Disconnecting %i", status);
+      server->end();
+      tMillis = millis();
+      status = WF_CONNECTING;
+      connect();
     } break;
     case WF_CONNECTING: {
-    if (millis() - tMillis > MAX_CONNECT_TIMEOUT_MS) {
-      log_w("Connecting failed (wifi status %i) after %l ms, create an AP instead", (millis() - tMillis), WiFi.status());
-      tMillis = millis();
-      strcpy(SSID, "");
-      connect();
-    }
+      if (millis() - tMillis > MAX_CONNECT_TIMEOUT_MS) {
+        tMillis = millis();
+        if (wifiRetries++ > 3) {
+          log_w("Connecting failed (wifi status %i) after %l ms, create an AP instead", (millis() - tMillis), WiFi.status());
+          strcpy(SSID, "");
+        }
+        connect();
+      }
     } break;
 
   }
