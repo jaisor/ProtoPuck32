@@ -107,12 +107,11 @@ char *getDeviceId() {
 }
 
 CWifiManager::CWifiManager(CDevice * const device)
-:apMode(false), rebootNeeded(false), device(device) {  
+:apMode(false), rebootNeeded(false), device(device), wifiRetries(0) {  
   pinMode(BOARD_LED_PIN,OUTPUT);
   this->mqtt.setClient(espClient);
   strcpy(SSID, configuration.wifiSsid);
   this->server = new AsyncWebServer(WEB_SERVER_PORT);
-  wifiRetries = 0;
   connect();
 }
 
