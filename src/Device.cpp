@@ -39,8 +39,10 @@ CDevice::CDevice() {
   delay(100);
 
 #ifdef LED
+  memset(_ledsInternal, 0, sizeof(CRGB)*LED_STRIP_SIZE);
   FastLED.addLeds<LED_TYPE, LED_PIN, LED_COLOR_ORDER>(_ledsInternal, LED_STRIP_SIZE).setCorrection( TypicalLEDStrip );
   #ifdef LED_EXTERNAL
+    memset(_ledsExternal, 0, sizeof(CRGB)*LED_EXTERNAL_STRIP_SIZE);
     FastLED.addLeds<LED_EXTERNAL_TYPE, LED_EXTERNAL_PIN, LED_EXTERNAL_COLOR_ORDER>(_ledsExternal, LED_EXTERNAL_STRIP_SIZE).setCorrection( TypicalLEDStrip );
   #endif
 #endif
@@ -67,6 +69,8 @@ CDevice::~CDevice() {
 }
 
 void CDevice::loop() {
+
+  #ifdef KEYPAD
 
   // Scan keypad
   uint16_t k = analogRead(KEYPAD_PIN);
@@ -128,9 +132,18 @@ void CDevice::loop() {
       filteredKeyStatus = maxKey;
   }
 
+  #endif
+
+  if (millis() - tMillisMin > 60000) {
+    tMillisMin = millis();
+    #ifdef LED
+      CONFIG_updateLedBrightnessTime();
+    #endif
+  }
+
 }
 
-
+#ifdef KEYPAD
 void CDevice::addKeyListener(TKeyListener listener) {
 
     listener_t *l = new listener_t { listener, nullptr }; 
@@ -154,3 +167,4 @@ void CDevice::addKeyListener(TKeyListener listener) {
     }
    
 }
+#endif

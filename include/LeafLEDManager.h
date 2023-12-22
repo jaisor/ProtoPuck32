@@ -1,6 +1,7 @@
 #ifndef _DEMO_LED_MANAGER_H
 #define _DEMO_LED_MANAGER_H
 
+#include <vector>
 #include "LEDManager.h"
 
 #ifdef LED

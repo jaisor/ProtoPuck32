@@ -14,10 +14,27 @@
 CDevice *device;
 CStateController *stateController;
 
+unsigned long tsSmoothBoot;
+bool smoothBoot;
+
 float p = 0;
 
 void setup() {
-  Serial.begin(115200); while (!Serial); delay(200);
+  delay( 100 ); // power-up safety delay
+
+  Serial.begin(115200);  while (!Serial); delay(200);
+  randomSeed(analogRead(0));
+
+  Log.begin(LOG_LEVEL_NOTICE, &Serial);
+  Log.noticeln("Initializing...");  
+
+  if (EEPROM_initAndCheckFactoryReset() >= 3) {
+    log_w("Factory reset conditions met!");
+    EEPROM_wipe();    
+  }
+
+  tsSmoothBoot = millis();
+  smoothBoot = false;
 
   EEPROM_loadConfig();
 
@@ -30,6 +47,13 @@ void setup() {
 }
 
 void loop() {
+
+  if (!smoothBoot && millis() - tsSmoothBoot > FACTORY_RESET_CLEAR_TIMER_MS) {
+    smoothBoot = true;
+    EEPROM_clearFactoryReset();
+    log_v("Device booted smoothly!");
+  }
+
   stateController->loop();
   device->loop();
 }

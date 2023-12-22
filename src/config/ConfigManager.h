@@ -1,6 +1,7 @@
 #ifndef _CONFIG_MANAGER_H
 #define _CONFIG_MANAGER_H
 
+#include <vector>
 #include "BaseManager.h"
 #include "BaseConfigItem.h"
 #include "Configuration.h"

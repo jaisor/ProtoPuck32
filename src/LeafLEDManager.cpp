@@ -15,7 +15,7 @@ CLeafLEDManager::CLeafLEDManager(CRGB *leds, uint16_t size, float brightness)
 
 #ifdef LED_EXTERNAL_LEAFS
     modes.push_back(new CFlowerMode(LED_EXTERNAL_STRIP_SIZE, LED_EXTERNAL_LEAF_SIZE));
-        modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, PartyColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
+    modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, PartyColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
     modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, RainbowColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
     modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, CloudColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
     modes.push_back(new CPaletteMode(LED_EXTERNAL_STRIP_SIZE, ForestColors_p, 255.0 / (float)LED_EXTERNAL_STRIP_SIZE));
@@ -44,6 +44,7 @@ uint16_t CLeafLEDManager::LED_Status(CRGB *leds) {
     return 10;
 }
 
+#ifdef KEYPAD
 void CLeafLEDManager::keyEvent(key_status_t key) {
 
     switch (key) {
@@ -63,3 +64,4 @@ void CLeafLEDManager::keyEvent(key_status_t key) {
     }
 
 }
+#endif

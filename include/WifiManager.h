@@ -2,8 +2,18 @@
 #define _WIFI_MANAGER_H
 
 #include <WiFi.h>
-#include <WebServer.h>
+
+#ifdef ESP32
+  #include <WiFi.h>
+  #include <AsyncTCP.h>
+#elif ESP8266
+  #include <ESP8266WiFi.h>
+  #include <ESPAsyncTCP.h>
+#endif
+#include <ESPAsyncWebServer.h>
+
 #include <PubSubClient.h>
+#include <ArduinoJson.h>
 #include "BaseManager.h"
 //#include "matrix/MatrixModeIoT.h"
 
@@ -15,29 +25,42 @@ typedef enum {
 class CWifiManager: public CBaseManager {
 
 private:
+    uint8_t wifiRetries;
     unsigned long tMillis;
     wifi_status status;
     char softAP_SSID[32];
     char SSID[32];
+    char mqttSubcribeTopicConfig[255];
+    bool apMode;
+    bool rebootNeeded;
 
-    WebServer server;
-    PubSubClient client;
+    AsyncWebServer* server;
+    PubSubClient mqtt;
     //CMatrixModeIoT *ioTManager;
+    CDevice * const device;
+
+    StaticJsonDocument<2048> sensorJson;
+    StaticJsonDocument<2048> configJson;
 
     void connect();
     void listen();
 
-    void handleRoot();
-    void handleConnect();
+    void handleRoot(AsyncWebServerRequest *request);
+    void handleConnect(AsyncWebServerRequest *request);
+    void handleConfig(AsyncWebServerRequest *request);
+    void handleFactoryReset(AsyncWebServerRequest *request);
 
     String getTempSensorResponse();
+    void postSensorUpdate();
     
 #ifdef LED_EXTERNAL_MATRIX
     void handleLEDMatrix();
 #endif
+
+    void mqttCallback(char *topic, uint8_t *payload, unsigned int);
     
 public:
-	CWifiManager();
+	CWifiManager(CDevice * const device);
 #ifdef OLED
     virtual uint16_t OLED_Status(Adafruit_GFX *oled);
 #endif

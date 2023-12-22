@@ -30,6 +30,7 @@ uint16_t CConfigManager::LED_Status(CRGB *leds) {
   }
 };
 
+#ifdef OLED
 uint16_t CConfigManager::OLED_Status(Adafruit_GFX *oled) {
   oled->drawRect(0, 0, 128, 64, WHITE);
   oled->fillRect(0, 0, 128, 11, WHITE);
@@ -47,11 +48,13 @@ uint16_t CConfigManager::OLED_Status(Adafruit_GFX *oled) {
 
   oled->setTextColor(WHITE);
 }
+#endif
 
 void CConfigManager::loop() {
 
 }
 
+#ifdef KEYPAD
 void CConfigManager::keyEvent(key_status_t key) {
 
     switch (key) {
@@ -62,3 +65,4 @@ void CConfigManager::keyEvent(key_status_t key) {
         default: ;
     }
 }
+#endif

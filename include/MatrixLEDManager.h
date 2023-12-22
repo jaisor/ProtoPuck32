@@ -1,6 +1,7 @@
 #ifndef _MATRIX_LED_MANAGER_H
 #define _MATRIX_LED_MANAGER_H
 
+#include <vector>
 #include "LEDManager.h"
 
 #ifdef LED_EXTERNAL_MATRIX

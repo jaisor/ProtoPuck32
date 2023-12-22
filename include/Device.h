@@ -5,87 +5,87 @@
 #include "Configuration.h"
 
 #ifdef LED
-    #include <FastLED.h>
+  #include <FastLED.h>
 #endif
 
 #ifdef OLED
-    #include <Adafruit_SSD1306.h>
-    #include <Adafruit_GFX.h>
+  #include <Adafruit_SSD1306.h>
+  #include <Adafruit_GFX.h>
 #endif
 
 #ifdef TEMP_SENSOR
-    #include <Adafruit_Sensor.h>
-    #include <Adafruit_BME280.h>
+  #include <Adafruit_Sensor.h>
+  #include <Adafruit_BME280.h>
 #endif
 
-#ifdef KEYPAD
-    typedef enum {
-        KEY_NONE = 0,
-        KEY_UP,
-        KEY_DOWN,
-        KEY_LEFT,
-        KEY_RIGHT,
-        KEY_MIDDLE,
-        NUM_KEYS
-    } key_status_t;
-#endif
+typedef enum {
+  KEY_NONE = 0,
+  KEY_UP,
+  KEY_DOWN,
+  KEY_LEFT,
+  KEY_RIGHT,
+  KEY_MIDDLE,
+  NUM_KEYS
+} key_status_t;
 
 class CDevice {
 
 public:
-    typedef std::function<void(key_status_t)> TKeyListener;
-    struct listener_t {
-        TKeyListener listener;
-        listener_t *next;
-    };
+  typedef std::function<void(key_status_t)> TKeyListener;
+  struct listener_t {
+    TKeyListener listener;
+    listener_t *next;
+  };
 
 	CDevice();
-    ~CDevice();
-    void loop();
+  ~CDevice();
+  void loop();
 
 #ifdef TEMP_SENSOR
-    float temperature() const { return _bme->readTemperature(); /*_temperature;*/ };
-    float humidity() const { return _bme->readHumidity(); /*_humidity;*/ };
-    float altitude() const { return _altitude; };
+  float temperature() const { return _bme->readTemperature(); /*_temperature;*/ };
+  float humidity() const { return _bme->readHumidity(); /*_humidity;*/ };
+  float altitude() const { return _altitude; };
 #endif
 
 #ifdef LED
-    CRGB* ledsInternal() { return _ledsInternal; };
-    CRGB* ledsExternal() { return _ledsExternal; };
+  CRGB* ledsInternal() { return _ledsInternal; };
+  CRGB* ledsExternal() { return _ledsExternal; };
 #endif
 
 #ifdef OLED
-    Adafruit_SSD1306* display() const { return _display; };
+  Adafruit_SSD1306* display() const { return _display; };
 #endif
 
-    key_status_t keyStatus() const { return _keyStatus; };
-
-    void addKeyListener(TKeyListener listener);
+#ifdef KEYPAD
+  key_status_t keyStatus() const { return _keyStatus; };
+  void addKeyListener(TKeyListener listener);
+#endif
 
 private:
-    
-    unsigned long tMillisTemp;
-    unsigned long tMillisKey;
+  
+  unsigned long tMillisTemp;
+  unsigned long tMillisKey;
+  unsigned long tMillisMin;
 
 #ifdef LED
-    CRGB _ledsInternal[LED_STRIP_SIZE];
-    CRGB _ledsExternal[LED_EXTERNAL_STRIP_SIZE];
+  CRGB _ledsInternal[LED_STRIP_SIZE];
+  CRGB _ledsExternal[LED_EXTERNAL_STRIP_SIZE];
 #endif
 
 #ifdef OLED
-    Adafruit_SSD1306 *_display;
+  Adafruit_SSD1306 *_display;
 #endif
 
 #ifdef TEMP_SENSOR
-    float _temperature, _humidity, _altitude;
-    Adafruit_BME280 *_bme;
+  float _temperature, _humidity, _altitude;
+  Adafruit_BME280 *_bme;
 #endif
 
-    key_status_t _keyStatus; 
-    key_status_t filteredKeyStatus;
-    uint16_t keyEventCounter[NUM_KEYS];
+  key_status_t _keyStatus; 
+  key_status_t filteredKeyStatus;
+  uint16_t keyEventCounter[NUM_KEYS];
 
-    listener_t *listener; // Linked list of TKeyListener nodes
+  listener_t *listener; // Linked list of TKeyListener nodes
 };
 
 #endif

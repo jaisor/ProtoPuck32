@@ -25,17 +25,17 @@ const unsigned char _key_bitmaps [6][8] PROGMEM = {
   { 0x0, 0x0, 0x54, 0x38, 0x7c, 0x38, 0x54, 0x0 } // MIDDLE
 };
 
-CStateController::CStateController(CDevice *device)
+CStateController::CStateController(CDevice * const device)
 :device(device) {
 
     configManager = new CConfigManager();
 
 #ifdef WIFI
-    managers.push_back(new CWifiManager());
+    managers.push_back(new CWifiManager(device));
 #endif
 
 #ifdef LED
-    managers.push_back(new CInternalLEDManager(LED_STRIP_SIZE, configuration.ledBrightness));
+    managers.push_back(new CInternalLEDManager(LED_STRIP_SIZE, configuration.ledBrightnessTime));
     #ifdef LED_EXTERNAL_MATRIX
         managers.push_back(new CMatrixLEDManager(device->ledsExternal(), LED_EXTERNAL_MATRIX_WIDTH, LED_EXTERNAL_MATRIX_HEIGHT, LED_EXTERNAL_BRIGHTNESS)); 
     #else
@@ -67,7 +67,10 @@ void CStateController::loop() {
     if (millis() - tMillis > 100) {
         
         tMillis = millis();
+
+        #ifdef OLED
         device->display()->clearDisplay();
+        #endif
 
         switch (state) {
             case S_HOME_SCREEN: drawStateHome(); break;
@@ -76,11 +79,13 @@ void CStateController::loop() {
             default: ;
         }
         
-    #ifdef LED
-        FastLED.show();
-    #endif
-    
+        #ifdef OLED
         device->display()->display();
+        #endif
+
+        #ifdef LED
+        FastLED.show();
+        #endif
     }  
 
     switch (state) {
@@ -111,8 +116,12 @@ void CStateController::drawStateHome() {
     display->setTextSize(1);
     display->setCursor(70, 24);
     display->print("K:");
-    display->print(String(analogRead(KEYPAD_PIN)));
-    display->drawBitmap(116, 24, _key_bitmaps[device->keyStatus()], 8, 8, 1);
+    #ifdef KEYPAD
+        display->print(String(analogRead(KEYPAD_PIN)));
+        display->drawBitmap(116, 24, _key_bitmaps[device->keyStatus()], 8, 8, 1);
+    #else
+        display->print("n/a");
+    #endif
 
     // FIXME
     // display temperature
@@ -125,7 +134,7 @@ void CStateController::drawStateHome() {
     int temp = device->temperature();
 
     bool tempInC = false;
-    display->print(String(tempInC ? temp : (temp*9/5)+32 ));
+    display->print(String(tempInC ? temp : (temp*1.8)+32 ));
     display->print(" ");
     display->setTextSize(1);
     display->cp437(true);

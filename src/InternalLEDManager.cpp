@@ -85,6 +85,7 @@ void CInternalLEDManager::loop() {
         if (brightnessChange) {
             brightnessChange = 0;
             configuration.ledBrightness = brightness;
+            CONFIG_updateLedBrightnessTime();
             EEPROM_saveConfig(); // Should not save so frequently to preserve the flash
         }
 

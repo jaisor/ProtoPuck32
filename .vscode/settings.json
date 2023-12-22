@@ -39,6 +39,11 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "utility": "cpp",
-        "typeinfo": "cpp"
-    }
+        "typeinfo": "cpp",
+        "optional": "cpp",
+        "xtr1common": "cpp",
+        "string": "cpp",
+        "*.matrix_sound": "cpp"
+    },
+    "cmake.configureOnOpen": false
 }
