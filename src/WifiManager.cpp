@@ -12,7 +12,7 @@
 #include "WifiManager.h"
 #include "Configuration.h"
 
-#define MAX_CONNECT_TIMEOUT_MS 15000 // 10 seconds to connect before creating its own AP
+#define MAX_CONNECT_TIMEOUT_MS 15000 // seconds to connect before creating its own AP
 #define BOARD_LED_PIN 2
 
 const int RSSI_MAX =-50;// define maximum straighten of signal in dBm
