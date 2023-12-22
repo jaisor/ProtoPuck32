@@ -42,6 +42,8 @@
         "typeinfo": "cpp",
         "optional": "cpp",
         "xtr1common": "cpp",
-        "string": "cpp"
-    }
+        "string": "cpp",
+        "*.matrix_sound": "cpp"
+    },
+    "cmake.configureOnOpen": false
 }
